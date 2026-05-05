@@ -1,0 +1,189 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-teal: var(--teal);
+  --color-ivory: var(--ivory);
+  --color-whatsapp: var(--whatsapp);
+
+  --shadow-soft: 0 4px 18px -6px color-mix(in oklab, var(--primary) 20%, transparent);
+  --shadow-elegant: 0 18px 50px -16px color-mix(in oklab, var(--primary) 35%, transparent);
+  --shadow-gold: 0 12px 36px -10px color-mix(in oklab, var(--gold) 45%, transparent);
+
+  --gradient-hero: linear-gradient(135deg, color-mix(in oklab, var(--primary) 85%, black) 0%, color-mix(in oklab, var(--primary) 65%, transparent) 60%, transparent 100%);
+  --gradient-warm: linear-gradient(135deg, var(--primary) 0%, var(--gold) 100%);
+  --gradient-paper: linear-gradient(180deg, var(--ivory) 0%, color-mix(in oklab, var(--ivory) 70%, var(--gold) 30%) 100%);
+
+  --animate-fade-in: fade-in 0.7s ease-out both;
+  --animate-fade-up: fade-up 0.8s ease-out both;
+  --animate-slow-zoom: slow-zoom 12s ease-out both;
+  --animate-shimmer: shimmer 2.5s linear infinite;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slow-zoom {
+  from { transform: scale(1.05); }
+  to   { transform: scale(1.15); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* Heritage palette */
+  --ivory: oklch(0.975 0.018 85);
+  --background: oklch(0.975 0.018 85);            /* warm ivory */
+  --foreground: oklch(0.24 0.035 40);             /* charcoal brown */
+
+  --card: oklch(0.99 0.012 85);
+  --card-foreground: oklch(0.24 0.035 40);
+
+  --popover: oklch(0.99 0.012 85);
+  --popover-foreground: oklch(0.24 0.035 40);
+
+  --primary: oklch(0.38 0.12 25);                 /* deep maroon */
+  --primary-foreground: oklch(0.98 0.012 85);
+
+  --secondary: oklch(0.93 0.025 70);              /* muted warm beige */
+  --secondary-foreground: oklch(0.28 0.05 30);
+
+  --muted: oklch(0.93 0.02 80);
+  --muted-foreground: oklch(0.46 0.04 45);
+
+  --accent: oklch(0.72 0.13 70);                  /* antique gold */
+  --accent-foreground: oklch(0.22 0.04 35);
+
+  --gold: oklch(0.72 0.13 70);
+  --gold-foreground: oklch(0.22 0.04 35);
+
+  --teal: oklch(0.42 0.07 200);                   /* deep teal accent */
+
+  --whatsapp: oklch(0.65 0.18 145);
+
+  --destructive: oklch(0.55 0.22 27);
+  --destructive-foreground: oklch(0.98 0.012 85);
+
+  --border: oklch(0.86 0.025 70);
+  --input: oklch(0.88 0.02 70);
+  --ring: oklch(0.38 0.12 25);
+
+  --sidebar: oklch(0.96 0.018 85);
+  --sidebar-foreground: oklch(0.24 0.035 40);
+  --sidebar-primary: oklch(0.38 0.12 25);
+  --sidebar-primary-foreground: oklch(0.98 0.012 85);
+  --sidebar-accent: oklch(0.93 0.025 70);
+  --sidebar-accent-foreground: oklch(0.28 0.05 30);
+  --sidebar-border: oklch(0.86 0.025 70);
+  --sidebar-ring: oklch(0.38 0.12 25);
+}
+
+.dark {
+  --background: oklch(0.18 0.025 35);
+  --foreground: oklch(0.95 0.018 85);
+  --card: oklch(0.22 0.03 35);
+  --card-foreground: oklch(0.95 0.018 85);
+  --popover: oklch(0.22 0.03 35);
+  --popover-foreground: oklch(0.95 0.018 85);
+  --primary: oklch(0.55 0.14 25);
+  --primary-foreground: oklch(0.98 0.012 85);
+  --secondary: oklch(0.28 0.04 35);
+  --secondary-foreground: oklch(0.95 0.018 85);
+  --muted: oklch(0.28 0.04 35);
+  --muted-foreground: oklch(0.7 0.03 60);
+  --accent: oklch(0.72 0.13 70);
+  --accent-foreground: oklch(0.18 0.025 35);
+  --gold: oklch(0.72 0.13 70);
+  --gold-foreground: oklch(0.18 0.025 35);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.55 0.14 25);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html { scroll-behavior: smooth; }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    /* subtle paper texture */
+    background-image:
+      radial-gradient(circle at 20% 10%, color-mix(in oklab, var(--gold) 8%, transparent) 0, transparent 40%),
+      radial-gradient(circle at 80% 90%, color-mix(in oklab, var(--primary) 6%, transparent) 0, transparent 45%);
+  }
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+  }
+}
+
+@layer components {
+  .heritage-divider {
+    display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+    color: var(--gold);
+  }
+  .heritage-divider::before,
+  .heritage-divider::after {
+    content: ""; height: 1px; flex: 1; max-width: 80px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .section-eyebrow {
+    font-family: var(--font-sans);
+    font-size: 0.75rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold-foreground);
+    background: color-mix(in oklab, var(--gold) 30%, transparent);
+    padding: 0.35rem 0.9rem; border-radius: 999px;
+    display: inline-block;
+  }
+  .container-prose { max-width: 1200px; margin-inline: auto; padding-inline: 1.25rem; }
+  .hover-lift { transition: transform .35s ease, box-shadow .35s ease; }
+  .hover-lift:hover { transform: translateY(-6px); box-shadow: var(--shadow-elegant); }
+  .image-zoom { overflow: hidden; }
+  .image-zoom img { transition: transform .8s ease; }
+  .image-zoom:hover img { transform: scale(1.08); }
+}
+
+/* Google fonts */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700&display=swap");
