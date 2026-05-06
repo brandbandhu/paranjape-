@@ -1,17 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "npm ci --prefer-offline --no-audit --no-fund",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/client",
-  "functions": {
-    "api/ssr.js": {
-      "includeFiles": "dist/server/**"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/:path*",
-      "destination": "/api/ssr"
-    }
-  ]
+  "buildCommand": "npm run build"
 }
