@@ -4,6 +4,19 @@ import shivneri from "@/assets/tour-shivneri.jpg";
 import parvati from "@/assets/tour-parvati.jpg";
 import kondane from "@/assets/tour-kondane.jpg";
 import gondeshwar from "@/assets/tour-gondeshwar.jpg";
+import heroTemple from "@/assets/hero-temple.jpg";
+import ayodhyaVaranasiPrayagraj from "@/assets/tour-ayodhya-varanasi-prayagraj.jpg";
+import {
+  type GalleryImage,
+  ayodhyaVaranasiPrayagrajGallery,
+  gondeshwarGallery,
+  hampiBadamiGallery,
+  kondaneGallery,
+  parvatiGallery,
+  shaniwarGallery,
+  shivneriGallery,
+  sinhagadGallery,
+} from "@/data/tourGalleries";
 
 export type Tour = {
   slug: string;
@@ -17,6 +30,7 @@ export type Tour = {
   groupSize: string;
   price: string;
   image: string;
+  gallery: GalleryImage[];
   short: string;
   overview: string;
   history: string;
@@ -27,6 +41,7 @@ export type Tour = {
   carry: string[];
   whoCanJoin: string;
   faqs: { q: string; a: string }[];
+  notes?: string[];
 };
 
 export const tours: Tour[] = [
@@ -42,6 +57,10 @@ export const tours: Tour[] = [
     groupSize: "6 – 20 people",
     price: "₹ — / person",
     image: shaniwar,
+    gallery: [
+      { src: shaniwar, alt: "Carved stone architecture inside Shaniwar Wada" },
+      ...shaniwarGallery,
+    ],
     short: "Step inside the Peshwa-era heart of Pune through stories, legends and stone.",
     overview:
       "A guided storytelling walk that unfolds the rise of the Peshwas, the daily rhythm of 18th-century Pune, and the architectural choices that shaped Shaniwar Wada. We walk slowly, look closely, and listen to history breathe.",
@@ -55,17 +74,35 @@ export const tours: Tour[] = [
       "Photo stops & cultural anecdotes",
     ],
     itinerary: [
-      { time: "Hour 1", title: "Gateway Stories", desc: "Meet at Delhi Darwaza. Introduction to Peshwa Pune." },
-      { time: "Hour 2", title: "Inside the Wada", desc: "Walk the foundations, fountain courtyard and fire-scarred halls." },
-      { time: "Hour 3", title: "Old Pune Lanes", desc: "Short walk into surrounding peths and traditional wadas." },
+      {
+        time: "Hour 1",
+        title: "Gateway Stories",
+        desc: "Meet at Delhi Darwaza. Introduction to Peshwa Pune.",
+      },
+      {
+        time: "Hour 2",
+        title: "Inside the Wada",
+        desc: "Walk the foundations, fountain courtyard and fire-scarred halls.",
+      },
+      {
+        time: "Hour 3",
+        title: "Old Pune Lanes",
+        desc: "Short walk into surrounding peths and traditional wadas.",
+      },
     ],
     inclusions: ["Heritage guide", "Entry tickets", "Bottled water", "Story handout"],
     exclusions: ["Travel to meeting point", "Personal expenses", "Food & beverages"],
     carry: ["Comfortable walking shoes", "Cap & sunglasses", "Water bottle", "Curiosity"],
     whoCanJoin: "Suitable for ages 8+. Friendly for families and senior citizens.",
     faqs: [
-      { q: "Is this walk suitable for children?", a: "Yes — we keep storytelling engaging for ages 8 and above." },
-      { q: "Will there be a lot of walking?", a: "Around 1.5 – 2 km at an easy pace, with frequent stops." },
+      {
+        q: "Is this walk suitable for children?",
+        a: "Yes — we keep storytelling engaging for ages 8 and above.",
+      },
+      {
+        q: "Will there be a lot of walking?",
+        a: "Around 1.5 – 2 km at an easy pace, with frequent stops.",
+      },
     ],
   },
   {
@@ -80,6 +117,10 @@ export const tours: Tour[] = [
     groupSize: "8 – 25 people",
     price: "₹ — / person",
     image: sinhagad,
+    gallery: [
+      { src: sinhagad, alt: "Sinhagad Fort overlooking the Sahyadri hills" },
+      ...sinhagadGallery,
+    ],
     short: "Walk the ramparts where Tanaji Malusare wrote his name into legend.",
     overview:
       "From the Pune Darwaza to Kalyan Darwaza, this trail blends a gentle climb with deep storytelling around the 1670 Battle of Sinhagad and Maratha military genius.",
@@ -93,7 +134,11 @@ export const tours: Tour[] = [
       "Battle storytelling on-site",
     ],
     itinerary: [
-      { time: "Morning", title: "Drive & Ascent", desc: "Drive from Pune; light climb to the fort." },
+      {
+        time: "Morning",
+        title: "Drive & Ascent",
+        desc: "Drive from Pune; light climb to the fort.",
+      },
       { time: "Mid-day", title: "Fort Walk", desc: "Walk the ramparts with on-site storytelling." },
       { time: "Afternoon", title: "Local Lunch", desc: "Traditional pithla bhakri at the fort." },
     ],
@@ -118,6 +163,7 @@ export const tours: Tour[] = [
     groupSize: "8 – 25 people",
     price: "₹ — / person",
     image: shivneri,
+    gallery: [{ src: shivneri, alt: "Stone path and fort walls at Shivneri" }, ...shivneriGallery],
     short: "Walk through the birthplace of Chhatrapati Shivaji Maharaj.",
     overview:
       "A full-day journey to Shivneri — the fort where a young Shivaji absorbed the lessons of Jijabai. We explore the seven gates, water cisterns and the very rooms that shaped Maratha history.",
@@ -156,6 +202,7 @@ export const tours: Tour[] = [
     groupSize: "6 – 20 people",
     price: "₹ — / person",
     image: parvati,
+    gallery: [{ src: parvati, alt: "Parvati Hill temple complex at sunrise" }, ...parvatiGallery],
     short: "A sunrise climb into Pune's spiritual and Peshwa-era memory.",
     overview:
       "An easy heritage climb to Parvati's temple complex — one of Pune's oldest. We unpack the Peshwa connection, the Devdeveshwar shrine and the panoramic story the city tells from above.",
@@ -177,7 +224,12 @@ export const tours: Tour[] = [
     exclusions: ["Travel", "Refreshments"],
     carry: ["Walking shoes", "Water", "Light jacket"],
     whoCanJoin: "All ages. Senior-citizen friendly with breaks.",
-    faqs: [{ q: "Is it safe early morning?", a: "Yes, the route is well-lit and busy with regular walkers." }],
+    faqs: [
+      {
+        q: "Is it safe early morning?",
+        a: "Yes, the route is well-lit and busy with regular walkers.",
+      },
+    ],
   },
   {
     slug: "kondane-caves-exploration",
@@ -191,6 +243,10 @@ export const tours: Tour[] = [
     groupSize: "8 – 20 people",
     price: "₹ — / person",
     image: kondane,
+    gallery: [
+      { src: kondane, alt: "Trail and rock-cut facade at Kondane Caves" },
+      ...kondaneGallery,
+    ],
     short: "Step into 2nd-century BCE Buddhist rock-cut wonders.",
     overview:
       "A full-day exploration of the Kondane caves — a beautifully carved chaitya and viharas tucked in the Sahyadris. We blend a short trek, ancient trade-route history and rock-cut architecture.",
@@ -227,6 +283,10 @@ export const tours: Tour[] = [
     groupSize: "8 – 25 people",
     price: "₹ — / person",
     image: gondeshwar,
+    gallery: [
+      { src: gondeshwar, alt: "Gondeshwar Temple stone spire against a blue sky" },
+      ...gondeshwarGallery,
+    ],
     short: "A masterpiece of Hemadpanthi architecture, decoded stone by stone.",
     overview:
       "A guided study of the 12th-century Gondeshwar temple complex — five shrines arranged in panchayatana style, with sculpture, geometry and mythology decoded by an expert.",
@@ -251,6 +311,219 @@ export const tours: Tour[] = [
     whoCanJoin: "All ages. No fitness barrier.",
     faqs: [{ q: "Can we photograph inside?", a: "Yes — Gondeshwar is photographer-friendly." }],
   },
+  {
+    slug: "hampi-badami-heritage-trip",
+    title: "Hampi Badami Heritage Trip",
+    category: "Multiple Day Tour",
+    location: "Badami, Pattadakal, Aihole, Ilkal and Hampi",
+    duration: "10-16 August 2026",
+    difficulty: "4-5 km walking/day",
+    bestFor: "",
+    bestSeason: "",
+    groupSize: "",
+    price: "Rs. 34,000",
+    image: heroTemple,
+    gallery: [
+      { src: heroTemple, alt: "Sunlit pillars and carvings inside a temple mandapa" },
+      ...hampiBadamiGallery,
+    ],
+    short:
+      "Badami, Pattadakal, Aihole and Hampi heritage tour with hotel stay, meals, local transport and sightseeing.",
+    overview:
+      "Catch a train from Mumbai or Pune towards Gadag, reach Badami by about 9 AM, and continue through Badami, Pattadakal, Aihole, Ilkal and Hampi before returning from Hospete on 16 August 2026.",
+    history: "",
+    highlights: [
+      "Badami Museum, Bhootnath Temple and Banashankari Temple",
+      "Pattadakal and Badami Caves",
+      "Aihole heritage sites and Ilkal saree shopping stop",
+      "Vijay Vitthala Temple, Hemakuta Hill and Virupaksha Temple",
+      "Hampi Museum, Lotus Mahal, Elephant Stable and Queen's Bath",
+      "Malyavant Raghunath Temple sunset",
+      "Royal Enclosure, Hazara Rama Temple and Krishna Temple area",
+      "Achyutaraya Temple, Kodandarama Temple and Yantroddharaka Maruti Temple",
+      "Coracle ride in Hampi if rain permits",
+    ],
+    itinerary: [
+      {
+        time: "Day 0 - 10 August 2026",
+        title: "Train to Badami",
+        desc: "Catch a train from Mumbai or Pune towards Gadag and reach Badami by about 9 AM the next morning. Train mentioned in the itinerary: 11139 - Hosapete SF Express.",
+      },
+      {
+        time: "Day 1 - 11 August 2026",
+        title: "Badami",
+        desc: "After breakfast check in to the hotel and after lunch proceed towards Badami Caves. Visit Badami Museum, Bhootnath Temple and spend the evening at Banashankari Temple. Meals: breakfast, lunch, evening tea/coffee and dinner.",
+      },
+      {
+        time: "Day 2 - 12 August 2026",
+        title: "Pattadakal and Badami Caves",
+        desc: "After breakfast head towards Pattadakal, explore Pattadakal till lunch, return to Badami and after lunch visit Badami Caves. Meals: breakfast, lunch and dinner.",
+      },
+      {
+        time: "Day 3 - 13 August 2026",
+        title: "Aihole and Hampi",
+        desc: "Head towards Aihole early in the morning, have breakfast there, visit heritage places in Aihole and then continue towards Hampi. En route stop at Ilkal for saree shopping. Stay at Hampi. Meals: breakfast, lunch and dinner.",
+      },
+      {
+        time: "Day 4 - 14 August 2026",
+        title: "Religious Hampi Trail",
+        desc: "Start at 6:00 AM with Vijay Vitthala Temple, then after breakfast explore Hemakuta Hill and Virupaksha Temple. After lunch at KSTDC visit Hampi Museum, Lotus Mahal, Elephant Stable and Queen's Bath, then watch sunset from Malyavant Raghunath Temple. Meals: breakfast, lunch, dinner and tea/coffee.",
+      },
+      {
+        time: "Day 5 - 15 August 2026",
+        title: "Royal Enclosure and Riverside Temples",
+        desc: "Visit the Royal Enclosure area and Hazara Rama Temple before breakfast. After breakfast explore Krishna Temple and the surrounding area, return for lunch, then spend the evening at Achyutaraya Temple, Kodandarama Temple and Yantroddharaka Maruti Temple. Coracle ride if available. Meals: breakfast, lunch, dinner and tea/coffee.",
+      },
+      {
+        time: "Day 6 - 16 August 2026",
+        title: "Departure from Hospete",
+        desc: "After breakfast depart to Hospete to catch the 1 PM train to your respective locations. Meals: breakfast and lunch. Dinner in the train is up to the participants.",
+      },
+    ],
+    inclusions: [
+      "Local transportation by private bus/car for all days depending on the number of participants",
+      "Comfortable AC hotel rooms on double sharing basis",
+      "Breakfast, lunch, dinner and evening tea as per set menu",
+      "Entrance fees to all sightseeing locations",
+      "Heritage expertise",
+      "Coracle ride in Hampi if rain permits",
+    ],
+    exclusions: [
+      "To and fro train cost to Hampi/Badami, around Rs. 2,500 depending on the coach booked",
+      "Personal food orders apart from the set menu",
+      "Mineral water bottles, porter charges, personal shopping and food bought elsewhere",
+      "Expenses due to illness, accident or hospitalization",
+      "Anything not included in the inclusions list",
+    ],
+    carry: [
+      "Clothes for 5 days",
+      "Hat/caps/goggles",
+      "Camera (optional)",
+      "Personal medicines",
+      "ID cards: Aadhar/PAN/Driving License",
+      "Dry snacks",
+      "A small carry bag/sack during day travel",
+      "Umbrella or raincoat",
+    ],
+    whoCanJoin:
+      "Participants should be comfortable with at least 4-5 km walking during the day. If you have any health problem or medical condition, let us know in advance and be prepared to adjust with the group.",
+    faqs: [],
+    notes: [
+      "30% advance needs to be paid while booking.",
+      "In case of medical condition or any special request, let us know in writing before you enroll for the tour.",
+      "The organizers are history experts and are there to facilitate the trip, so participants are expected to behave respectfully with them.",
+    ],
+  },
+  {
+    slug: "ayodhya-varanasi-prayagraj-tour",
+    title: "Varanasi-Sarnath-Ayodhya Heritage Tour",
+    category: "Multiple Day Tour",
+    location: "Varanasi, Sarnath, Ayodhya and Lucknow",
+    duration: "5 Days / 4 Nights",
+    difficulty: "4-5 km walking/day",
+    bestFor: "Families, spiritual travellers and heritage seekers",
+    bestSeason: "",
+    groupSize: "",
+    price: "Rs. 32,000",
+    image: ayodhyaVaranasiPrayagraj,
+    gallery: [
+      { src: ayodhyaVaranasiPrayagraj, alt: "Shri Ram Janmabhoomi Mandir in Ayodhya" },
+      ...ayodhyaVaranasiPrayagrajGallery.slice(0, 2),
+    ],
+    short:
+      "Five days of Ganga Aarti, Kashi darshan, Sarnath, Ram Lala in Ayodhya, and a final Lucknow city day.",
+    overview:
+      "Planned for 8-12 July 2026, this guided heritage journey begins in Varanasi, continues through Sarnath, gives Ayodhya a full darshan-focused day, and closes with Lucknow sightseeing before departure. The pace is designed for travellers who want temple visits, city history and comfortable group coordination together.",
+    history:
+      "Varanasi is one of the world's oldest living cities, Sarnath marks the site of the Buddha's first sermon, Ayodhya is revered as the birthplace of Shri Ram and one of Hinduism's seven sacred cities, and Lucknow carries the layered courtly heritage of Awadh. Together, the route offers a compact but meaningful North India pilgrimage and culture circuit.",
+    highlights: [
+      "Evening Ganga Aarti and ghat walk in Varanasi",
+      "Early darshan at Kashi Vishweshwar and Kal Bhairavnath",
+      "Guided visit to the Sarnath archaeological site",
+      "Ram Lala darshan in Ayodhya with Hanuman Garhi, Kanak Bhavan and Dashrath Mahal",
+      "Lucknow monuments and Chikankari shopping time",
+      "AC stay, meals, Sugam Darshan and Varanasi boat ride included",
+    ],
+    itinerary: [
+      {
+        time: "Day 1",
+        title: "Arrival in Varanasi and Ganga Aarti",
+        desc: "Fly from Mumbai or Pune to Varanasi, reach by about 1 PM, check in after arrival, and head to the Ganga ghat in the evening for Aarti and an introduction to the history of the city. Lunch and evening tea are included.",
+      },
+      {
+        time: "Day 2",
+        title: "Kashi Vishweshwar Darshan and Old Varanasi",
+        desc: "Begin early with darshan at Kashi Vishweshwar, return for breakfast, and then continue with local sightseeing. The day includes Kal Bhairavnath Temple, time on the old ghats, and shopping in Varanasi. Breakfast, lunch, evening tea or coffee, and dinner are included.",
+      },
+      {
+        time: "Day 3",
+        title: "Sarnath Visit and Transfer to Ayodhya",
+        desc: "After breakfast, check out and visit the Sarnath archaeological site. Following lunch, travel onward to Ayodhya, reach by evening, and check in for the night. Breakfast, lunch, evening tea or coffee, and dinner are included.",
+      },
+      {
+        time: "Day 4",
+        title: "Ayodhya Darshan and Transfer to Lucknow",
+        desc: "Start early with Ram Lala darshan, return for breakfast, and then visit Hanuman Garhi, Kanak Bhavan and Dashrath Mahal. After lunch, check out and continue to Lucknow, arriving by evening for check-in and leisure time. Breakfast, lunch, evening tea or coffee, and dinner are included.",
+      },
+      {
+        time: "Day 5",
+        title: "Lucknow Sightseeing and Departure",
+        desc: "Spend the day exploring key Lucknow monuments and shopping for Chikankari clothing before departing at night with the tour's closing meal service. Breakfast, lunch and evening tea or coffee are included.",
+      },
+    ],
+    inclusions: [
+      "Local transportation by private bus, car or rickshaw depending on group size",
+      "Comfortable AC three-star hotel rooms on double-sharing basis",
+      "Breakfast, lunch, dinner and evening tea on a set menu",
+      "Entrance fees to all listed sightseeing locations",
+      "Heritage expertise throughout the tour",
+      "Sugam Darshan charges in Varanasi",
+      "Boat ride charges in Varanasi",
+    ],
+    exclusions: [
+      "Flights or train tickets from Pune or Mumbai to Varanasi and the return journey home",
+      "Optional Pune to Navi Mumbai airport transfers, if arranged separately",
+      "Personal food orders outside the set menu",
+      "Mineral water, porter charges, personal shopping and snacks bought separately",
+      "Expenses due to illness, accident or hospitalization",
+      "Ayodhya temple wheelchair charges, about Rs. 150 per wheelchair",
+      "Anything not specifically listed in the inclusions",
+    ],
+    carry: [
+      "Clothes for 5 days",
+      "Comfortable walking footwear",
+      "Hat, cap or sunglasses",
+      "Personal medicines",
+      "Government ID proof",
+      "Dry snacks",
+      "Small day bag",
+      "Camera (optional)",
+    ],
+    whoCanJoin:
+      "Suitable for families, devotees and mixed-age groups who can comfortably manage 4-5 km of walking during the day. Please share any health condition or mobility support requirement in advance so the group plan can be managed smoothly.",
+    faqs: [
+      {
+        q: "Are flights included in the tour cost?",
+        a: "No. The Rs. 32,000 cost covers the land package only; flights or train tickets to Varanasi and the onward return are excluded.",
+      },
+      {
+        q: "How much walking should I expect during the trip?",
+        a: "Please expect around 4-5 km of walking over the course of the day across temple areas, ghats and city lanes.",
+      },
+      {
+        q: "Is there any group discount or advance payment requirement?",
+        a: "Yes. A 5% group discount applies when 4 or more people join, and booking requires a 30% advance payment.",
+      },
+    ],
+    notes: [
+      "Departure covered in the itinerary: 8-12 July 2026.",
+      "A 5% group discount applies when 4 or more people join the tour.",
+      "Booking requires a 30% advance payment.",
+      "Sightseeing is planned to reduce afternoon heat, with more movement in the morning and evening.",
+      "Temple timings, darshan flow and local security arrangements may change the exact sequence.",
+      "If you need medical or mobility support, please share it in writing before booking.",
+    ],
+  },
 ];
 
 export const getTour = (slug: string) => tours.find((t) => t.slug === slug);
@@ -270,7 +543,8 @@ export const blogPosts = [
     title: "The Legacy of Maharashtra Forts",
     date: "April 12, 2026",
     category: "Forts",
-    excerpt: "From Sahyadri ridges to coastal sea-forts — why these stones still speak to us today.",
+    excerpt:
+      "From Sahyadri ridges to coastal sea-forts — why these stones still speak to us today.",
     image: sinhagad,
   },
   {

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UpcomingRouteImport } from './routes/upcoming'
 import { Route as StoriesRouteImport } from './routes/stories'
+import { Route as ShopRouteImport } from './routes/shop'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
@@ -27,6 +28,11 @@ const UpcomingRoute = UpcomingRouteImport.update({
 const StoriesRoute = StoriesRouteImport.update({
   id: '/stories',
   path: '/stories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GalleryRoute = GalleryRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
   '/upcoming': typeof UpcomingRoute
   '/tours/$slug': typeof ToursSlugRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
   '/upcoming': typeof UpcomingRoute
   '/tours/$slug': typeof ToursSlugRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/blog': typeof BlogRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
   '/upcoming': typeof UpcomingRoute
   '/tours/$slug': typeof ToursSlugRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/gallery'
+    | '/shop'
     | '/stories'
     | '/upcoming'
     | '/tours/$slug'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/gallery'
+    | '/shop'
     | '/stories'
     | '/upcoming'
     | '/tours/$slug'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/gallery'
+    | '/shop'
     | '/stories'
     | '/upcoming'
     | '/tours/$slug'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRoute
   ContactRoute: typeof ContactRoute
   GalleryRoute: typeof GalleryRoute
+  ShopRoute: typeof ShopRoute
   StoriesRoute: typeof StoriesRoute
   UpcomingRoute: typeof UpcomingRoute
   ToursSlugRoute: typeof ToursSlugRoute
@@ -161,6 +174,13 @@ declare module '@tanstack/react-router' {
       path: '/stories'
       fullPath: '/stories'
       preLoaderRoute: typeof StoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gallery': {
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRoute,
   ContactRoute: ContactRoute,
   GalleryRoute: GalleryRoute,
+  ShopRoute: ShopRoute,
   StoriesRoute: StoriesRoute,
   UpcomingRoute: UpcomingRoute,
   ToursSlugRoute: ToursSlugRoute,

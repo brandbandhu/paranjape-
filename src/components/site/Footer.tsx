@@ -32,7 +32,7 @@ export function Footer() {
               ["Home", "/"],
               ["About", "/about"],
               ["Tours", "/tours"],
-              ["Gallery", "/gallery"],
+              ["Shop", "/shop"],
               ["Blog", "/blog"],
               ["Contact", "/contact"],
             ].map(([label, to]) => (

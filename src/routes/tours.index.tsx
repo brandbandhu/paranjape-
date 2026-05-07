@@ -1,12 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { useMemo } from "react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
 import { TourCard } from "@/components/site/TourCard";
 import { tours } from "@/data/tours";
+import { filterToursByListingType, tourListingFilters, type TourListingFilter } from "@/data/tourFilters";
 import heroFort from "@/assets/hero-fort.jpg";
 
+function isTourListingFilter(value: string): value is TourListingFilter {
+  return tourListingFilters.some((filter) => filter.value === value);
+}
+
 export const Route = createFileRoute("/tours/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    type: typeof search.type === "string" && isTourListingFilter(search.type) ? search.type : "all",
+  }),
   head: () => ({
     meta: [
       { title: "Heritage Tours — Paranjape Tours" },
@@ -18,11 +26,10 @@ export const Route = createFileRoute("/tours/")({
   component: ToursList,
 });
 
-const filters = ["All", "Heritage Walk", "Fort Tour", "Temple & Architecture", "Ancient Caves Tour"];
-
 function ToursList() {
-  const [active, setActive] = useState("All");
-  const list = useMemo(() => active === "All" ? tours : tours.filter((t) => t.category === active), [active]);
+  const { type } = Route.useSearch();
+  const list = useMemo(() => filterToursByListingType(tours, type), [type]);
+  const activeFilter = tourListingFilters.find((filter) => filter.value === type) ?? tourListingFilters[0];
 
   return (
     <Layout>
@@ -34,16 +41,32 @@ function ToursList() {
       />
       <section className="container-prose py-14">
         <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {filters.map((f) => (
-            <button key={f} onClick={() => setActive(f)}
+          {tourListingFilters.map((filter) => (
+            <Link
+              key={filter.value}
+              to="/tours"
+              search={filter.value === "all" ? {} : { type: filter.value }}
               className={`rounded-full border px-4 py-2 text-sm transition-colors ${
-                active === f ? "bg-primary text-primary-foreground border-primary" : "border-border hover:border-gold hover:text-primary"
-              }`}>{f}</button>
+                type === filter.value ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-gold hover:text-primary"
+              }`}
+            >
+              {filter.label}
+            </Link>
           ))}
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {list.map((t) => <TourCard key={t.slug} tour={t} />)}
-        </div>
+        {list.length ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {list.map((t, i) => <TourCard key={t.slug} tour={t} index={i} />)}
+          </div>
+        ) : (
+          <div className="site-card rounded-[2rem] border border-border bg-card px-6 py-12 text-center shadow-[var(--shadow-soft)]">
+            <p className="text-xs uppercase tracking-[0.22em] text-gold">{activeFilter.label}</p>
+            <h2 className="mt-3 font-serif text-3xl text-primary">No tours available in this category yet.</h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              We can help you plan a custom trip while we prepare more journeys for this section.
+            </p>
+          </div>
+        )}
       </section>
     </Layout>
   );

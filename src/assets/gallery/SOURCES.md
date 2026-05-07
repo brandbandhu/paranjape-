@@ -1,0 +1,29 @@
+Wikimedia Commons source pages for the added tour and gallery photos:
+
+- `shaniwar-entrance.jpg`: https://commons.wikimedia.org/wiki/File:The_entrance_of_Shaniwar_Wada..JPG
+- `shaniwar-front.jpg`: https://commons.wikimedia.org/wiki/File:Front_view_of_Shaniwar_Wada_illuminated.jpg
+- `shaniwar-side.jpg`: https://commons.wikimedia.org/wiki/File:Side_view_of_Shaniwar_Wada_illuminated.jpg
+- `sinhagad-view.jpg`: https://commons.wikimedia.org/wiki/File:Sinhagad_2010.JPG
+- `sinhagad-ramparts.jpg`: https://commons.wikimedia.org/wiki/File:Sinhagad_fort_in_pune_(12).jpg
+- `sinhagad-gate.jpg`: https://commons.wikimedia.org/wiki/File:Gate,_Sinhgad_Fort,_Pune.jpg
+- `shivneri-main.jpg`: https://commons.wikimedia.org/wiki/File:Shivneri_fort_main_building.jpg
+- `shivneri-view.jpg`: https://commons.wikimedia.org/wiki/File:View_of_Shivneri_Fort_(2).jpg
+- `shivneri-gate.jpg`: https://commons.wikimedia.org/wiki/File:Mena_Gate_-_Shivneri_fort.JPG
+- `parvati-hill.jpg`: https://commons.wikimedia.org/wiki/File:Parvati.JPG
+- `parvati-entrance.jpg`: https://commons.wikimedia.org/wiki/File:Parvati_Hill_temple_complex_entrance,_Pune.jpg
+- `parvati-shikhara.jpg`: https://commons.wikimedia.org/wiki/File:Shikhara_of_temples_on_Parvati_Hill,_Pune_(3).jpg
+- `kondane-side-view.jpg`: https://commons.wikimedia.org/wiki/File:011_Side_View_(33308156190).jpg
+- `kondane-chaitya.jpg`: https://commons.wikimedia.org/wiki/File:Kondane_caves_-Kondhane_-Maharashtra_-N-MH-M61.jpg
+- `kondane-overview.jpg`: https://commons.wikimedia.org/wiki/File:Kondane_cave_overview.jpg
+- `gondeshwar-complex.jpg`: https://commons.wikimedia.org/wiki/File:Gondeshwar_temple,_Sinnar.jpg
+- `gondeshwar-angle.jpg`: https://commons.wikimedia.org/wiki/File:Gondeshwar_temple,_Sinnar_PSK4589.jpg
+- `gondeshwar-detail.jpg`: https://commons.wikimedia.org/wiki/File:Gondeshwar_Temple-Sinnar-Nashik-Maharashtra-6.jpg
+- `hampi-vitthala.jpg`: https://commons.wikimedia.org/wiki/File:Hampi_Vitthala_Temple_3465.jpg
+- `hampi-pillars.jpg`: https://commons.wikimedia.org/wiki/File:Architecture_of_Vitthala_Temple,_Hampi.jpg
+- `badami-cave.jpg`: https://commons.wikimedia.org/wiki/File:Cave_Temple_3,_Badami.JPG
+- `pattadakal-temple.jpg`: https://commons.wikimedia.org/wiki/File:A-temple-at-pattadakal-badami.jpg
+- `aihole-durga.jpg`: https://commons.wikimedia.org/wiki/File:Durga_Temple_-_Aihole_with_cloud.jpg
+- `tour-ayodhya-varanasi-prayagraj.jpg`: https://commons.wikimedia.org/wiki/File:Shri_Ram_Janambhoomi_Mandir,_Ayodhya_Dham.jpg
+- `varanasi-munshi-ghat.jpg`: https://commons.wikimedia.org/wiki/File:Varanasi_Munshi_Ghat3.jpg
+- `varanasi-dashashwamedh.jpg`: https://commons.wikimedia.org/wiki/File:Dashashwamedh_Ghat%27s_View_Varanasi.jpg
+- `prayagraj-sangam.jpg`: https://commons.wikimedia.org/wiki/File:Prayagraj_Sangam_2.jpg

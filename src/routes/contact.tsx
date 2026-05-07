@@ -44,7 +44,7 @@ function Contact() {
             e.preventDefault();
             setSent(true);
           }}
-          className="rounded-2xl bg-card border border-border p-7 md:p-9 shadow-[var(--shadow-soft)]"
+          className="site-card rounded-2xl bg-card border border-border p-7 md:p-9 shadow-[var(--shadow-soft)]"
         >
           <span className="section-eyebrow">Send Enquiry</span>
           <h2 className="mt-3 font-serif text-3xl text-primary">Plan your heritage journey</h2>
@@ -78,7 +78,7 @@ function Contact() {
           {sent && <p className="mt-4 text-sm text-primary animate-fade-in">Thank you - we'll get back to you shortly.</p>}
         </form>
 
-        <div className="space-y-5">
+        <div className="site-card-stack space-y-5">
           <InfoCard icon={Phone} title="Call Us" lines={["+91 9420010881", "Mon - Sat, 10am - 7pm"]} />
           <InfoCard icon={WhatsAppIcon} title="WhatsApp" lines={["+91 7020402446", "Personal / fastest way to reach us"]} />
           <InfoCard icon={Mail} title="Email" lines={["hello@paranjapetours.in"]} />
@@ -88,7 +88,7 @@ function Contact() {
       </section>
 
       <section className="container-prose pb-16">
-        <div className="rounded-2xl overflow-hidden border border-border aspect-[16/7] bg-secondary">
+        <div className="site-card rounded-2xl overflow-hidden border border-border aspect-[16/7] bg-secondary">
           <iframe
             title="Office location"
             src="https://www.openstreetmap.org/export/embed.html?bbox=73.83%2C18.50%2C73.88%2C18.55&layer=mapnik"
@@ -101,9 +101,9 @@ function Contact() {
       <section className="container-prose pb-20">
         <h2 className="font-serif text-3xl md:text-4xl text-primary text-center">Frequently Asked Questions</h2>
         <div className="heritage-divider my-5"><span /></div>
-        <div className="grid gap-4 md:grid-cols-2 max-w-4xl mx-auto">
+        <div className="site-card-grid grid gap-4 md:grid-cols-2 max-w-4xl mx-auto">
           {faqs.map((f) => (
-            <div key={f.q} className="rounded-xl border border-border bg-card p-5">
+            <div key={f.q} className="site-card rounded-xl border border-border bg-card p-5">
               <h3 className="font-medium text-primary">{f.q}</h3>
               <p className="mt-2 text-sm text-foreground/80">{f.a}</p>
             </div>
@@ -134,11 +134,11 @@ function Field({ label, name, type = "text", required }: { label: string; name: 
 
 function InfoCard({ icon: Icon, title, lines }: { icon: any; title: string; lines: string[] }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 flex gap-4">
-      <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gold/15 text-primary shrink-0">
+    <div className="site-card rounded-2xl border border-border bg-card p-5 flex gap-4">
+      <span className="site-card-icon inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gold/15 text-primary shrink-0">
         <Icon size={18} />
       </span>
-      <div>
+      <div className="site-card-content">
         <h4 className="font-serif text-lg text-primary">{title}</h4>
         {lines.map((line, i) => (
           <p key={i} className="text-sm text-foreground/80">{line}</p>

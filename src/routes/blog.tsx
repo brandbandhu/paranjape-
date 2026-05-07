@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { CSSProperties } from "react";
 import { ArrowRight } from "lucide-react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
@@ -17,6 +18,10 @@ export const Route = createFileRoute("/blog")({
   component: Blog,
 });
 
+const cardDelayStyle = (index: number): CSSProperties => ({
+  "--card-delay": `${index * 90}ms`,
+}) as CSSProperties;
+
 function Blog() {
   return (
     <Layout>
@@ -27,15 +32,31 @@ function Blog() {
         image={heroStory}
       />
 
-      <section className="container-prose py-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {blogPosts.map((b) => (
-          <article key={b.slug} className="group rounded-2xl bg-card border border-border overflow-hidden hover-lift">
-            <div className="image-zoom aspect-[4/3]"><img src={b.image} alt={b.title} className="h-full w-full object-cover" loading="lazy" /></div>
-            <div className="p-6">
-              <p className="text-xs uppercase tracking-[0.25em] text-gold">{b.category} - {b.date}</p>
-              <h3 className="mt-2 font-serif text-xl text-primary leading-snug">{b.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{b.excerpt}</p>
-              <span className="mt-3 inline-flex items-center text-sm text-primary group-hover:gap-2 gap-1 transition-all">Read More <ArrowRight size={14} /></span>
+      <section className="container-prose site-card-grid py-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {blogPosts.map((b, index) => (
+          <article
+            key={b.slug}
+            className="heritage-tile group h-full"
+            style={cardDelayStyle(index)}
+          >
+            <div className="heritage-tile-media">
+              <img src={b.image} alt={b.title} className="h-full w-full object-cover" loading="lazy" />
+              <span className="heritage-tile-ribbon">{b.date}</span>
+              <span className="heritage-tile-fab" aria-hidden="true">
+                <ArrowRight size={18} />
+              </span>
+            </div>
+            <div className="heritage-tile-body">
+              <p className="heritage-tile-kicker">{b.category}</p>
+              <h3 className="mt-3 font-serif text-[1.65rem] leading-[1.08] text-primary">{b.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{b.excerpt}</p>
+              <div className="heritage-tile-footer mt-6">
+                <span className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Paranjape Journal</span>
+                <span className="inline-flex items-center gap-2 text-sm font-medium text-primary">
+                  Read More
+                  <ArrowRight className="heritage-tile-linkicon" size={14} />
+                </span>
+              </div>
             </div>
           </article>
         ))}
