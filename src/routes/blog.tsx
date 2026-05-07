@@ -1,12 +1,13 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
 import { ArrowRight } from "lucide-react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
-import { blogPosts } from "@/data/tours";
+import { getPublicSiteContent } from "@/lib/content.functions";
 import heroStory from "@/assets/hero-story.jpg";
 
 export const Route = createFileRoute("/blog")({
+  loader: () => getPublicSiteContent(),
   head: () => ({
     meta: [
       { title: "Blog - Paranjape Tours Journal" },
@@ -23,6 +24,8 @@ const cardDelayStyle = (index: number): CSSProperties => ({
 }) as CSSProperties;
 
 function Blog() {
+  const { blogPosts } = Route.useLoaderData();
+
   return (
     <Layout>
       <PageBanner
@@ -34,8 +37,10 @@ function Blog() {
 
       <section className="container-prose site-card-grid py-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {blogPosts.map((b, index) => (
-          <article
+          <Link
             key={b.slug}
+            to="/blog/$slug"
+            params={{ slug: b.slug }}
             className="heritage-tile group h-full"
             style={cardDelayStyle(index)}
           >
@@ -58,7 +63,7 @@ function Blog() {
                 </span>
               </div>
             </div>
-          </article>
+          </Link>
         ))}
       </section>
     </Layout>

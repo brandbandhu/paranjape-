@@ -13,12 +13,14 @@ import { Route as UpcomingRouteImport } from './routes/upcoming'
 import { Route as StoriesRouteImport } from './routes/stories'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as GalleryRouteImport } from './routes/gallery'
-import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToursIndexRouteImport } from './routes/tours.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ToursSlugRouteImport } from './routes/tours.$slug'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as AdminLoginRouteImport } from './routes/admin.login'
 
 const UpcomingRoute = UpcomingRouteImport.update({
   id: '/upcoming',
@@ -38,11 +40,6 @@ const ShopRoute = ShopRouteImport.update({
 const GalleryRoute = GalleryRouteImport.update({
   id: '/gallery',
   path: '/gallery',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -65,47 +62,68 @@ const ToursIndexRoute = ToursIndexRouteImport.update({
   path: '/tours/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ToursSlugRoute = ToursSlugRouteImport.update({
   id: '/tours/$slug',
   path: '/tours/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blog': typeof BlogRoute
-  '/contact': typeof ContactRoute
+  '/blog': typeof BlogRouteWithChildren
   '/gallery': typeof GalleryRoute
   '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
   '/upcoming': typeof UpcomingRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/tours/$slug': typeof ToursSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/tours/': typeof ToursIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blog': typeof BlogRoute
-  '/contact': typeof ContactRoute
+  '/blog': typeof BlogRouteWithChildren
   '/gallery': typeof GalleryRoute
   '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
   '/upcoming': typeof UpcomingRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/tours/$slug': typeof ToursSlugRoute
+  '/admin': typeof AdminIndexRoute
   '/tours': typeof ToursIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blog': typeof BlogRoute
-  '/contact': typeof ContactRoute
+  '/blog': typeof BlogRouteWithChildren
   '/gallery': typeof GalleryRoute
   '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
   '/upcoming': typeof UpcomingRoute
+  '/admin/login': typeof AdminLoginRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/tours/$slug': typeof ToursSlugRoute
+  '/admin/': typeof AdminIndexRoute
   '/tours/': typeof ToursIndexRoute
 }
 export interface FileRouteTypes {
@@ -114,49 +132,56 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/blog'
-    | '/contact'
     | '/gallery'
     | '/shop'
     | '/stories'
     | '/upcoming'
+    | '/admin/login'
+    | '/blog/$slug'
     | '/tours/$slug'
+    | '/admin/'
     | '/tours/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/blog'
-    | '/contact'
     | '/gallery'
     | '/shop'
     | '/stories'
     | '/upcoming'
+    | '/admin/login'
+    | '/blog/$slug'
     | '/tours/$slug'
+    | '/admin'
     | '/tours'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/blog'
-    | '/contact'
     | '/gallery'
     | '/shop'
     | '/stories'
     | '/upcoming'
+    | '/admin/login'
+    | '/blog/$slug'
     | '/tours/$slug'
+    | '/admin/'
     | '/tours/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  BlogRoute: typeof BlogRoute
-  ContactRoute: typeof ContactRoute
+  BlogRoute: typeof BlogRouteWithChildren
   GalleryRoute: typeof GalleryRoute
   ShopRoute: typeof ShopRoute
   StoriesRoute: typeof StoriesRoute
   UpcomingRoute: typeof UpcomingRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   ToursSlugRoute: typeof ToursSlugRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   ToursIndexRoute: typeof ToursIndexRoute
 }
 
@@ -190,13 +215,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/blog': {
       id: '/blog'
       path: '/blog'
@@ -225,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToursIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tours/$slug': {
       id: '/tours/$slug'
       path: '/tours/$slug'
@@ -232,19 +257,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToursSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
+
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  BlogRoute: BlogRoute,
-  ContactRoute: ContactRoute,
+  BlogRoute: BlogRouteWithChildren,
   GalleryRoute: GalleryRoute,
   ShopRoute: ShopRoute,
   StoriesRoute: StoriesRoute,
   UpcomingRoute: UpcomingRoute,
+  AdminLoginRoute: AdminLoginRoute,
   ToursSlugRoute: ToursSlugRoute,
+  AdminIndexRoute: AdminIndexRoute,
   ToursIndexRoute: ToursIndexRoute,
 }
 export const routeTree = rootRouteImport

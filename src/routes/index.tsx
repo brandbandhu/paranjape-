@@ -12,15 +12,17 @@ import {
   Utensils,
 } from "lucide-react";
 import { Layout } from "@/components/site/Layout";
+import { getPublicSiteContent } from "@/lib/content.functions";
+import type { Testimonial } from "@/lib/content.types";
 import { WhatsAppIcon } from "@/components/site/WhatsAppIcon";
 import { TourCard } from "@/components/site/TourCard";
-import { tours, blogPosts } from "@/data/tours";
 import heroFort from "@/assets/hero-fort.jpg";
 import heroTemple from "@/assets/hero-temple.jpg";
 import heroWalk from "@/assets/hero-walk.jpg";
 import heroStory from "@/assets/hero-story.jpg";
 
 export const Route = createFileRoute("/")({
+  loader: () => getPublicSiteContent(),
   head: () => ({
     meta: [
       { title: "Paranjape Tours — Heritage Storytelling Travel in Maharashtra" },
@@ -100,29 +102,6 @@ const whyUs = [
   },
 ];
 
-const testimonials = [
-  {
-    name: "Anita Joshi",
-    role: "Family traveller",
-    text: "The Shaniwar Wada walk made history come alive for our kids. We didn't want it to end.",
-  },
-  {
-    name: "Rahul Deshmukh",
-    role: "School teacher",
-    text: "I've taken three batches of students with Paranjape Tours. The storytelling is exceptional.",
-  },
-  {
-    name: "Meera Kulkarni",
-    role: "History enthusiast",
-    text: "Sinhagad with their guide felt less like a trek and more like a Maratha epic unfolding.",
-  },
-  {
-    name: "Aniket Patil",
-    role: "Corporate group lead",
-    text: "Smooth, soulful and genuinely premium. Our team still talks about it.",
-  },
-];
-
 const featuredTours = [
   { slug: "shivneri-fort-tour", tagLabel: "One Day Tour" },
   { slug: "shaniwar-wada-heritage-walk", tagLabel: "Heritage Walk" },
@@ -130,6 +109,7 @@ const featuredTours = [
 ] as const;
 
 function Home() {
+  const { tours, blogPosts, testimonials } = Route.useLoaderData();
   const [slide, setSlide] = useState(0);
   useEffect(() => {
     const t = setInterval(() => setSlide((s) => (s + 1) % slides.length), 5500);
@@ -304,7 +284,8 @@ function Home() {
           {blogPosts.slice(0, 3).map((b) => (
             <Link
               key={b.slug}
-              to="/blog"
+              to="/blog/$slug"
+              params={{ slug: b.slug }}
               className="site-card group rounded-2xl bg-card border border-border overflow-hidden hover-lift"
             >
               <div className="site-card-media image-zoom aspect-[4/3]">
@@ -408,7 +389,7 @@ function Section({
   );
 }
 
-function TestimonialsCarousel({ items }: { items: typeof testimonials }) {
+function TestimonialsCarousel({ items }: { items: Testimonial[] }) {
   const [idx, setIdx] = useState(0);
   const ref = useRef<number | null>(null);
   useEffect(() => {

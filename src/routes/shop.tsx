@@ -13,14 +13,11 @@ import {
 } from "lucide-react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
+import { getPublicSiteContent } from "@/lib/content.functions";
 import heroTemple from "@/assets/hero-temple.jpg";
-import heroStory from "@/assets/hero-story.jpg";
-import heroWalk from "@/assets/hero-walk.jpg";
-import shaniwar from "@/assets/tour-shaniwar.jpg";
-import sinhagad from "@/assets/tour-sinhagad.jpg";
-import shivneri from "@/assets/tour-shivneri.jpg";
 
 export const Route = createFileRoute("/shop")({
+  loader: () => getPublicSiteContent(),
   head: () => ({
     meta: [
       { title: "Shop - Paranjape Tours" },
@@ -61,57 +58,6 @@ const collections = [
   },
 ] as const;
 
-const products = [
-  {
-    image: heroWalk,
-    badge: "Bestseller",
-    category: "Booklet",
-    title: "Pune Heritage Walk Companion",
-    price: "Rs. 299",
-    description: "A compact storytelling guide to old Pune landmarks, wadas and cultural clues.",
-  },
-  {
-    image: shivneri,
-    badge: "New",
-    category: "Study Kit",
-    title: "Shivneri Explorer Kit",
-    price: "Rs. 649",
-    description: "Timeline cards, a site map and activity sheets for students visiting Shivneri.",
-  },
-  {
-    image: heroTemple,
-    badge: "Gift Pick",
-    category: "Print Set",
-    title: "Temple Detail Postcard Pack",
-    price: "Rs. 399",
-    description: "A set of textured art postcards inspired by stone carvings and temple motifs.",
-  },
-  {
-    image: shaniwar,
-    badge: "Group Order",
-    category: "Souvenir",
-    title: "Shaniwar Wada Keepsake Box",
-    price: "Rs. 899",
-    description: "A premium gift box for school groups, cultural events and corporate outings.",
-  },
-  {
-    image: sinhagad,
-    badge: "Traveller Favorite",
-    category: "Map",
-    title: "Sahyadri Fort Trails Map",
-    price: "Rs. 349",
-    description: "A folded reference map for iconic fort circuits with quick history notes.",
-  },
-  {
-    image: heroStory,
-    badge: "Custom",
-    category: "Bulk Gifting",
-    title: "Curated Heritage Gift Hamper",
-    price: "From Rs. 1,499",
-    description: "Made-to-order hampers for institutions, family celebrations and hosted groups.",
-  },
-] as const;
-
 const orderingSteps = [
   {
     icon: Package,
@@ -135,6 +81,8 @@ const cardDelayStyle = (index: number, offset = 0): CSSProperties => ({
 }) as CSSProperties;
 
 function Shop() {
+  const { shopItems } = Route.useLoaderData();
+
   return (
     <Layout>
       <PageBanner
@@ -265,9 +213,9 @@ function Shop() {
         </div>
 
         <div className="site-card-grid mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {products.map((product, index) => (
+          {shopItems.map((product, index) => (
             <article
-              key={product.title}
+              key={product.slug}
               className="heritage-tile group h-full"
               style={cardDelayStyle(index)}
             >

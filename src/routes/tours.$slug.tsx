@@ -5,22 +5,27 @@ import { Layout } from "@/components/site/Layout";
 import { Breadcrumb } from "@/components/site/Breadcrumb";
 import { TourCard } from "@/components/site/TourCard";
 import { WhatsAppIcon } from "@/components/site/WhatsAppIcon";
-import { getTour, tours } from "@/data/tours";
+import { getPublicSiteContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/tours/$slug")({
-  loader: ({ params }) => {
-    const tour = getTour(params.slug);
+  loader: async ({ params }) => {
+    const content = await getPublicSiteContent();
+    const tour = content.tours.find((item) => item.slug === params.slug);
     if (!tour) throw notFound();
-    return tour;
+
+    return {
+      tour,
+      tours: content.tours,
+    };
   },
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.title} — Paranjape Tours` },
-          { name: "description", content: loaderData.short },
-          { property: "og:title", content: loaderData.title },
-          { property: "og:description", content: loaderData.short },
-          { property: "og:image", content: loaderData.image },
+          { title: `${loaderData.tour.title} â€” Paranjape Tours` },
+          { name: "description", content: loaderData.tour.short },
+          { property: "og:title", content: loaderData.tour.title },
+          { property: "og:description", content: loaderData.tour.short },
+          { property: "og:image", content: loaderData.tour.image },
         ]
       : [],
   }),
@@ -30,7 +35,7 @@ export const Route = createFileRoute("/tours/$slug")({
         <h1 className="font-serif text-4xl text-primary">Tour not found</h1>
         <Link
           to="/tours"
-          className="mt-6 inline-flex rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm"
+          className="mt-6 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm text-primary-foreground"
         >
           Back to Tours
         </Link>
@@ -49,7 +54,7 @@ export const Route = createFileRoute("/tours/$slug")({
               router.invalidate();
               reset();
             }}
-            className="mt-6 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm"
+            className="mt-6 rounded-full bg-primary px-5 py-2.5 text-sm text-primary-foreground"
           >
             Try again
           </button>
@@ -61,7 +66,7 @@ export const Route = createFileRoute("/tours/$slug")({
 });
 
 function TourDetail() {
-  const tour = Route.useLoaderData();
+  const { tour, tours } = Route.useLoaderData();
   const related = tours
     .filter((t) => t.slug !== tour.slug && t.category === tour.category)
     .slice(0, 3);
@@ -77,7 +82,6 @@ function TourDetail() {
 
   return (
     <Layout>
-      {/* HERO */}
       <section className="relative h-[64vh] min-h-[420px] w-full overflow-hidden">
         <img
           src={tour.image}
@@ -85,7 +89,7 @@ function TourDetail() {
           className="absolute inset-0 h-full w-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-background" />
-        <div className="container-prose relative z-10 h-full flex flex-col justify-end pb-10 text-primary-foreground">
+        <div className="container-prose relative z-10 flex h-full flex-col justify-end pb-10 text-primary-foreground">
           <Breadcrumb
             items={[
               { label: "Home", to: "/" },
@@ -94,14 +98,13 @@ function TourDetail() {
             ]}
           />
           <span className="mt-3 section-eyebrow w-fit">{tour.category}</span>
-          <h1 className="mt-3 font-serif text-4xl md:text-6xl max-w-3xl">{tour.title}</h1>
+          <h1 className="mt-3 max-w-3xl font-serif text-4xl md:text-6xl">{tour.title}</h1>
         </div>
       </section>
 
-      {/* META + CTA */}
-      <section className="container-prose -mt-8 relative z-20">
-        <div className="site-card rounded-2xl bg-card border border-border shadow-[var(--shadow-elegant)] p-6 md:p-7 grid gap-6 md:grid-cols-[1fr_auto] items-center">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+      <section className="container-prose relative z-20 -mt-8">
+        <div className="site-card grid items-center gap-6 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-elegant)] md:grid-cols-[1fr_auto] md:p-7">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
             {metaItems.map((item) => (
               <Meta key={item.label} icon={item.icon} label={item.label} value={item.value} />
             ))}
@@ -109,7 +112,7 @@ function TourDetail() {
           <div className="flex flex-wrap gap-3">
             <Link
               to="/contact"
-              className="inline-flex items-center rounded-full bg-primary text-primary-foreground px-5 py-3 text-sm font-medium shadow-[var(--shadow-soft)]"
+              className="inline-flex items-center rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-[var(--shadow-soft)]"
             >
               Enquire Now
             </Link>
@@ -117,7 +120,7 @@ function TourDetail() {
               href={`https://wa.me/910000000000?text=${encodeURIComponent("I'd like to know more about " + tour.title)}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-whatsapp text-white px-5 py-3 text-sm font-medium"
+              className="inline-flex items-center gap-2 rounded-full bg-whatsapp px-5 py-3 text-sm font-medium text-white"
             >
               <WhatsAppIcon size={16} /> WhatsApp
             </a>
@@ -125,7 +128,7 @@ function TourDetail() {
         </div>
       </section>
 
-      <section className="container-prose py-16 grid gap-12 lg:grid-cols-[2fr_1fr]">
+      <section className="container-prose grid gap-12 py-16 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-12">
           {tour.overview.trim() && (
             <Block title="Overview">
@@ -141,11 +144,11 @@ function TourDetail() {
 
           {tour.highlights.length > 0 && (
             <Block title="Tour Highlights">
-              <ul className="grid sm:grid-cols-2 gap-2">
-                {tour.highlights.map((h) => (
-                  <li key={h} className="flex items-start gap-2 text-foreground/85">
-                    <Check className="text-gold mt-0.5" size={16} />
-                    {h}
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {tour.highlights.map((highlight) => (
+                  <li key={highlight} className="flex items-start gap-2 text-foreground/85">
+                    <Check className="mt-0.5 text-gold" size={16} />
+                    {highlight}
                   </li>
                 ))}
               </ul>
@@ -154,15 +157,15 @@ function TourDetail() {
 
           {tour.itinerary.length > 0 && (
             <Block title="Detailed Itinerary">
-              <ol className="relative border-l-2 border-gold/40 pl-6 space-y-6">
-                {tour.itinerary.map((it, i) => (
-                  <li key={i} className="relative">
-                    <span className="absolute -left-[34px] top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gold text-gold-foreground text-xs font-semibold">
-                      {i + 1}
+              <ol className="relative space-y-6 border-l-2 border-gold/40 pl-6">
+                {tour.itinerary.map((item, index) => (
+                  <li key={`${item.time}-${item.title}-${index}`} className="relative">
+                    <span className="absolute -left-[34px] top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-gold text-xs font-semibold text-gold-foreground">
+                      {index + 1}
                     </span>
-                    <p className="text-xs uppercase tracking-[0.2em] text-gold">{it.time}</p>
-                    <h4 className="font-serif text-lg text-primary mt-1">{it.title}</h4>
-                    <p className="mt-1 text-sm text-foreground/80">{it.desc}</p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-gold">{item.time}</p>
+                    <h4 className="mt-1 font-serif text-lg text-primary">{item.title}</h4>
+                    <p className="mt-1 text-sm text-foreground/80">{item.desc}</p>
                   </li>
                 ))}
               </ol>
@@ -170,14 +173,14 @@ function TourDetail() {
           )}
 
           {(tour.inclusions.length > 0 || tour.exclusions.length > 0) && (
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid gap-8 md:grid-cols-2">
               {tour.inclusions.length > 0 && (
                 <Block title="Inclusions">
                   <ul className="space-y-2">
-                    {tour.inclusions.map((x) => (
-                      <li key={x} className="flex gap-2 text-foreground/85">
-                        <Check size={16} className="text-gold mt-0.5" />
-                        {x}
+                    {tour.inclusions.map((item) => (
+                      <li key={item} className="flex gap-2 text-foreground/85">
+                        <Check size={16} className="mt-0.5 text-gold" />
+                        {item}
                       </li>
                     ))}
                   </ul>
@@ -186,10 +189,10 @@ function TourDetail() {
               {tour.exclusions.length > 0 && (
                 <Block title="Exclusions">
                   <ul className="space-y-2">
-                    {tour.exclusions.map((x) => (
-                      <li key={x} className="flex gap-2 text-foreground/85">
-                        <X size={16} className="text-destructive mt-0.5" />
-                        {x}
+                    {tour.exclusions.map((item) => (
+                      <li key={item} className="flex gap-2 text-foreground/85">
+                        <X size={16} className="mt-0.5 text-destructive" />
+                        {item}
                       </li>
                     ))}
                   </ul>
@@ -199,14 +202,14 @@ function TourDetail() {
           )}
 
           {(tour.carry.length > 0 || tour.whoCanJoin.trim()) && (
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid gap-8 md:grid-cols-2">
               {tour.carry.length > 0 && (
                 <Block title="Things to Carry">
                   <ul className="space-y-2">
-                    {tour.carry.map((x) => (
-                      <li key={x} className="flex gap-2 text-foreground/85">
-                        <Check size={16} className="text-gold mt-0.5" />
-                        {x}
+                    {tour.carry.map((item) => (
+                      <li key={item} className="flex gap-2 text-foreground/85">
+                        <Check size={16} className="mt-0.5 text-gold" />
+                        {item}
                       </li>
                     ))}
                   </ul>
@@ -214,7 +217,7 @@ function TourDetail() {
               )}
               {tour.whoCanJoin.trim() && (
                 <Block title="Who Can Join">
-                  <p className="text-foreground/85 leading-relaxed">{tour.whoCanJoin}</p>
+                  <p className="leading-relaxed text-foreground/85">{tour.whoCanJoin}</p>
                 </Block>
               )}
             </div>
@@ -225,7 +228,7 @@ function TourDetail() {
               <ul className="space-y-2">
                 {tour.notes.map((note) => (
                   <li key={note} className="flex gap-2 text-foreground/85">
-                    <Check size={16} className="text-gold mt-0.5" />
+                    <Check size={16} className="mt-0.5 text-gold" />
                     {note}
                   </li>
                 ))}
@@ -234,11 +237,11 @@ function TourDetail() {
           )}
 
           <Block title="Photo Gallery">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {tour.gallery.map((image, i) => (
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              {tour.gallery.map((image, index) => (
                 <div
-                  key={`${tour.slug}-${i}`}
-                  className="image-zoom aspect-square rounded-xl overflow-hidden"
+                  key={`${tour.slug}-${index}`}
+                  className="image-zoom aspect-square overflow-hidden rounded-xl"
                 >
                   <img
                     src={image.src}
@@ -254,21 +257,21 @@ function TourDetail() {
           {tour.faqs.length > 0 && (
             <Block title="Frequently Asked Questions">
               <div className="space-y-3">
-                {tour.faqs.map((f, i) => (
-                  <Faq key={i} q={f.q} a={f.a} />
+                {tour.faqs.map((faq, index) => (
+                  <Faq key={`${faq.q}-${index}`} q={faq.q} a={faq.a} />
                 ))}
               </div>
             </Block>
           )}
         </div>
 
-        <aside className="space-y-6 lg:sticky lg:top-24 self-start">
+        <aside className="self-start space-y-6 lg:sticky lg:top-24">
           <div className="site-card rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
             <p className="text-xs uppercase tracking-[0.2em] text-gold">Starting From</p>
-            <p className="font-serif text-3xl text-primary mt-1">{tour.price}</p>
+            <p className="mt-1 font-serif text-3xl text-primary">{tour.price}</p>
             <Link
               to="/contact"
-              className="mt-5 block text-center rounded-full bg-primary text-primary-foreground px-5 py-3 text-sm font-medium"
+              className="mt-5 block rounded-full bg-primary px-5 py-3 text-center text-sm font-medium text-primary-foreground"
             >
               Send Enquiry
             </Link>
@@ -276,7 +279,7 @@ function TourDetail() {
               href="https://wa.me/910000000000"
               target="_blank"
               rel="noreferrer"
-              className="mt-3 block text-center rounded-full bg-whatsapp text-white px-5 py-3 text-sm font-medium"
+              className="mt-3 block rounded-full bg-whatsapp px-5 py-3 text-center text-sm font-medium text-white"
             >
               WhatsApp Now
             </a>
@@ -286,20 +289,19 @@ function TourDetail() {
             <p className="mt-1 text-sm text-muted-foreground">
               We design private heritage trips for families, schools and corporate groups.
             </p>
-            <Link to="/contact" className="mt-4 inline-flex text-sm text-primary font-medium">
-              Plan with us →
+            <Link to="/contact" className="mt-4 inline-flex text-sm font-medium text-primary">
+              Plan with us â†’
             </Link>
           </div>
         </aside>
       </section>
 
-      {/* RELATED */}
       <section className="bg-[color-mix(in_oklab,var(--secondary)_50%,var(--background))] py-16">
         <div className="container-prose">
-          <h2 className="font-serif text-3xl text-primary text-center mb-10">Related Tours</h2>
+          <h2 className="mb-10 text-center font-serif text-3xl text-primary">Related Tours</h2>
           <div className="grid gap-6 md:grid-cols-3">
-            {(related.length ? related : fallback).map((t, i) => (
-              <TourCard key={t.slug} tour={t} index={i} />
+            {(related.length ? related : fallback).map((item, index) => (
+              <TourCard key={item.slug} tour={item} index={index} />
             ))}
           </div>
         </div>
@@ -308,7 +310,15 @@ function TourDetail() {
   );
 }
 
-function Meta({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+function Meta({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: any;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="flex items-start gap-3">
       <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-gold/15 text-primary">
@@ -325,8 +335,8 @@ function Meta({ icon: Icon, label, value }: { icon: any; label: string; value: s
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="font-serif text-2xl md:text-3xl text-primary">{title}</h2>
-      <div className="heritage-divider my-4 max-w-[160px] !mx-0">
+      <h2 className="font-serif text-2xl text-primary md:text-3xl">{title}</h2>
+      <div className="heritage-divider !mx-0 my-4 max-w-[160px]">
         <span />
       </div>
       {children}
@@ -337,18 +347,18 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
 function Faq({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="site-card rounded-xl border border-border bg-card overflow-hidden">
+    <div className="site-card overflow-hidden rounded-xl border border-border bg-card">
       <button
-        onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between text-left px-5 py-4"
+        onClick={() => setOpen((value) => !value)}
+        className="flex w-full items-center justify-between px-5 py-4 text-left"
       >
         <span className="font-medium text-primary">{q}</span>
         <ChevronDown
           size={18}
-          className={`transition-transform ${open ? "rotate-180" : ""} text-gold`}
+          className={`text-gold transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
-      {open && <div className="px-5 pb-5 text-sm text-foreground/80 animate-fade-in">{a}</div>}
+      {open && <div className="animate-fade-in px-5 pb-5 text-sm text-foreground/80">{a}</div>}
     </div>
   );
 }

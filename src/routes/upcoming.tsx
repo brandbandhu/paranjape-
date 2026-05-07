@@ -2,10 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
-import { tours, upcomingTours } from "@/data/tours";
+import { upcomingTours } from "@/data/tours";
+import { getPublicSiteContent } from "@/lib/content.functions";
 import heroTemple from "@/assets/hero-temple.jpg";
 
 export const Route = createFileRoute("/upcoming")({
+  loader: () => getPublicSiteContent(),
   head: () => ({
     meta: [
       { title: "Upcoming Heritage Tours — Paranjape Tours" },
@@ -18,7 +20,13 @@ export const Route = createFileRoute("/upcoming")({
 });
 
 function Upcoming() {
-  const items = upcomingTours.map((u) => ({ ...u, tour: tours.find((t) => t.slug === u.slug)! }));
+  const { tours } = Route.useLoaderData();
+  const items = upcomingTours
+    .map((u) => {
+      const tour = tours.find((item) => item.slug === u.slug);
+      return tour ? { ...u, tour } : null;
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
   return (
     <Layout>
       <PageBanner title="Upcoming Tours" subtitle="Plan your next journey through Maharashtra's living heritage."

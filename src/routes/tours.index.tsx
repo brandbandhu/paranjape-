@@ -3,8 +3,8 @@ import { useMemo } from "react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
 import { TourCard } from "@/components/site/TourCard";
-import { tours } from "@/data/tours";
 import { filterToursByListingType, tourListingFilters, type TourListingFilter } from "@/data/tourFilters";
+import { getPublicSiteContent } from "@/lib/content.functions";
 import heroFort from "@/assets/hero-fort.jpg";
 
 function isTourListingFilter(value: string): value is TourListingFilter {
@@ -12,6 +12,7 @@ function isTourListingFilter(value: string): value is TourListingFilter {
 }
 
 export const Route = createFileRoute("/tours/")({
+  loader: () => getPublicSiteContent(),
   validateSearch: (search: Record<string, unknown>) => ({
     type: typeof search.type === "string" && isTourListingFilter(search.type) ? search.type : "all",
   }),
@@ -27,8 +28,9 @@ export const Route = createFileRoute("/tours/")({
 });
 
 function ToursList() {
+  const { tours } = Route.useLoaderData();
   const { type } = Route.useSearch();
-  const list = useMemo(() => filterToursByListingType(tours, type), [type]);
+  const list = useMemo(() => filterToursByListingType(tours, type), [tours, type]);
   const activeFilter = tourListingFilters.find((filter) => filter.value === type) ?? tourListingFilters[0];
 
   return (
