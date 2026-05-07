@@ -46,12 +46,8 @@ function Blog() {
           >
             <div className="heritage-tile-media">
               <img src={b.image} alt={b.title} className="h-full w-full object-cover" loading="lazy" />
-              <span className="heritage-tile-ribbon">{b.date}</span>
-              <span className="heritage-tile-fab" aria-hidden="true">
-                <ArrowRight size={18} />
-              </span>
             </div>
-            <div className="heritage-tile-body">
+            <div className="heritage-tile-body pr-6">
               <p className="heritage-tile-kicker">{b.category}</p>
               <h3 className="mt-3 font-serif text-[1.65rem] leading-[1.08] text-primary">{b.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{b.excerpt}</p>

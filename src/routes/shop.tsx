@@ -221,18 +221,8 @@ function Shop() {
             >
               <div className="heritage-tile-media">
                 <img src={product.image} alt={product.title} className="h-full w-full object-cover" loading="lazy" />
-                <span className="heritage-tile-ribbon">
-                  {product.badge}
-                </span>
-                <Link
-                  to="/contact"
-                  className="heritage-tile-fab heritage-tile-fab-link"
-                  aria-label={`Enquire about ${product.title}`}
-                >
-                  <ArrowRight size={18} />
-                </Link>
               </div>
-              <div className="heritage-tile-body">
+              <div className="heritage-tile-body pr-6">
                 <p className="heritage-tile-kicker">{product.category}</p>
                 <h3 className="mt-3 font-serif text-[1.65rem] leading-[1.08] text-primary">{product.title}</h3>
                 <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{product.description}</p>
