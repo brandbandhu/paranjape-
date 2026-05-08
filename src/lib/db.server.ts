@@ -8,7 +8,7 @@ const DEFAULT_DB_PORT = Number(process.env.MYSQL_PORT ?? "3306");
 const DEFAULT_DB_USER = process.env.MYSQL_USER ?? "root";
 const DEFAULT_DB_PASSWORD = process.env.MYSQL_PASSWORD ?? "root";
 const DEFAULT_DB_NAME = process.env.MYSQL_DATABASE ?? "paranjpe_tours";
-const DB_SCHEMA_VERSION = "paranjpe-cms-v2";
+const DB_SCHEMA_VERSION = "paranjpe-cms-v3";
 
 const SCRYPT_KEY_LENGTH = 64;
 
@@ -176,6 +176,30 @@ async function createTables(pool: Pool) {
       published_on DATE NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS contact_enquiries (
+      id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      category_value VARCHAR(80) NOT NULL,
+      category_label VARCHAR(160) NOT NULL,
+      full_name VARCHAR(160) NOT NULL,
+      email VARCHAR(190) NOT NULL,
+      phone VARCHAR(40) NOT NULL,
+      preferred_contact_method VARCHAR(40) NOT NULL,
+      organization_name VARCHAR(255) NOT NULL,
+      subject VARCHAR(255) NOT NULL,
+      schedule_details VARCHAR(255) NOT NULL,
+      group_details VARCHAR(160) NOT NULL,
+      location_details VARCHAR(255) NOT NULL,
+      message TEXT NOT NULL,
+      status VARCHAR(40) NOT NULL DEFAULT 'new',
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_contact_enquiries_created_at (created_at),
+      INDEX idx_contact_enquiries_status (status),
+      INDEX idx_contact_enquiries_category (category_value)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
 

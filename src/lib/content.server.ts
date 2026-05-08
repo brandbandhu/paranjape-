@@ -1,4 +1,10 @@
 import { blogPosts as staticBlogPosts, tours as staticTours } from "@/data/tours";
+import {
+  findEnquiryCategoryConfig,
+  findPreferredContactMethod,
+  type ContactEnquiryInput,
+} from "@/data/contactEnquiry";
+import { siteContact } from "@/data/siteContact";
 import { staticShopItems, staticTestimonials } from "@/data/staticSiteContent";
 import { requireAdmin } from "@/lib/auth.server";
 import { getPool } from "@/lib/db.server";
@@ -311,6 +317,86 @@ export type SaveBlogPostInput = {
   publishedOn?: string;
 };
 
+function looksLikeEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function countPhoneDigits(value: string) {
+  return value.replace(/\D/g, "").length;
+}
+
+function normalizeContactEnquiryInput(input: ContactEnquiryInput) {
+  const category = findEnquiryCategoryConfig(input.categoryValue);
+  if (!category) {
+    throw new Error("Please choose a valid enquiry category.");
+  }
+
+  const preferredContactMethod = findPreferredContactMethod(input.preferredContactMethod);
+  if (!preferredContactMethod) {
+    throw new Error("Please choose how you would like us to contact you.");
+  }
+
+  const fullName = input.fullName.trim();
+  const email = input.email.trim().toLowerCase();
+  const phone = input.phone.trim();
+  const organizationName = input.organizationName.trim();
+  const subject = input.subject.trim();
+  const scheduleDetails = input.scheduleDetails.trim();
+  const groupDetails = input.groupDetails.trim();
+  const locationDetails = input.locationDetails.trim();
+  const message = input.message.trim();
+
+  if (fullName.length < 2) {
+    throw new Error("Please enter your full name.");
+  }
+
+  if (!looksLikeEmail(email)) {
+    throw new Error("Please enter a valid email address.");
+  }
+
+  if (phone.length > 0 && countPhoneDigits(phone) < 8) {
+    throw new Error("Please enter a valid phone or WhatsApp number.");
+  }
+
+  if (category.organizationRequired && organizationName.length < 2) {
+    throw new Error(`Please enter your ${category.organizationLabel.toLowerCase()}.`);
+  }
+
+  if (subject.length < 3) {
+    throw new Error(`Please enter your ${category.subjectLabel.toLowerCase()}.`);
+  }
+
+  if (scheduleDetails.length < 3) {
+    throw new Error(`Please enter your ${category.scheduleLabel.toLowerCase()}.`);
+  }
+
+  if (groupDetails.length < 1) {
+    throw new Error(`Please enter your ${category.groupLabel.toLowerCase()}.`);
+  }
+
+  if (locationDetails.length < 2) {
+    throw new Error(`Please enter your ${category.locationLabel.toLowerCase()}.`);
+  }
+
+  if (message.length < 12) {
+    throw new Error("Please share a few more details so we can guide you properly.");
+  }
+
+  return {
+    category,
+    preferredContactMethod,
+    fullName,
+    email,
+    phone,
+    organizationName,
+    subject,
+    scheduleDetails,
+    groupDetails,
+    locationDetails,
+    message,
+  };
+}
+
 async function getCategoryLabel(categoryId?: number) {
   if (!categoryId) {
     return "";
@@ -618,4 +704,55 @@ export async function deleteBlogPostById(id: number) {
   await requireAdmin();
   const pool = await getPool();
   await pool.execute("DELETE FROM blogs WHERE id = ?", [id]);
+}
+
+export async function createContactEnquiry(input: ContactEnquiryInput) {
+  const normalized = normalizeContactEnquiryInput(input);
+
+  try {
+    const pool = await getPool();
+    const [result] = await pool.execute<any>(
+      `
+        INSERT INTO contact_enquiries (
+          category_value,
+          category_label,
+          full_name,
+          email,
+          phone,
+          preferred_contact_method,
+          organization_name,
+          subject,
+          schedule_details,
+          group_details,
+          location_details,
+          message
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      [
+        normalized.category.value,
+        normalized.category.label,
+        normalized.fullName,
+        normalized.email,
+        normalized.phone,
+        normalized.preferredContactMethod.value,
+        normalized.organizationName,
+        normalized.subject,
+        normalized.scheduleDetails,
+        normalized.groupDetails,
+        normalized.locationDetails,
+        normalized.message,
+      ],
+    );
+
+    return {
+      success: true,
+      enquiryId: Number(result?.insertId ?? 0),
+      categoryLabel: normalized.category.label,
+    };
+  } catch (error) {
+    console.error("Unable to save contact enquiry.", error);
+    throw new Error(
+      `We couldn't save your enquiry right now. Please email ${siteContact.email} or call ${siteContact.primaryPhone}.`,
+    );
+  }
 }

@@ -1,10 +1,12 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import type { CSSProperties } from "react";
-import { ArrowRight, BookOpen, Gift, Mail, MapPin, Phone, ScrollText, Users } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState, type ComponentType, type FormEvent } from "react";
+import { Clock, Mail, MapPin, Phone, Send } from "lucide-react";
+import type { ContactEnquiryInput } from "@/data/contactEnquiry";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
 import { WhatsAppIcon } from "@/components/site/WhatsAppIcon";
-import heroWalk from "@/assets/hero-walk.jpg";
+import { siteContact } from "@/data/siteContact";
+import { submitContactEnquiry } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -12,249 +14,518 @@ export const Route = createFileRoute("/contact")({
       { title: "Contact - Paranjape Tours" },
       {
         name: "description",
-        content:
-          "Get in touch with Paranjape Tours for heritage tour enquiries, school groups, shop orders and custom travel plans.",
+        content: "Plan your Maharashtra heritage journey. Talk to our team via phone, email or WhatsApp.",
       },
       { property: "og:title", content: "Contact Paranjape Tours" },
-      {
-        property: "og:description",
-        content:
-          "Call, WhatsApp or email Paranjape Tours to plan a heritage journey, group tour or custom enquiry.",
-      },
+      { property: "og:description", content: "We'd love to design your next heritage trip." },
     ],
   }),
   component: Contact,
 });
 
-const whatsappUrl =
-  "https://wa.me/917020402446?text=" +
-  encodeURIComponent("Hello Paranjape Tours, I would like to enquire about a heritage tour.");
+type SimpleContactFormState = {
+  fullName: string;
+  email: string;
+  phone: string;
+  tourInterest: string;
+  preferredDate: string;
+  numberOfPeople: string;
+  message: string;
+};
 
-const mapUrl = "https://maps.google.com/?q=Avalon,+Anandnagar,+Sinhagad+Road,+Pune";
+type ContactCard = {
+  icon: ComponentType<{ size?: number; className?: string }>;
+  title: string;
+  lines: { text: string; href?: string; external?: boolean }[];
+};
 
-const contactMethods = [
+const tourInterestOptions = [
+  "Any / Need recommendation",
+  "Shaniwar Wada Heritage Walk",
+  "Sinhagad Fort Heritage Trail",
+  "Shivneri Fort Tour",
+  "Parvati Hill Heritage Walk",
+  "Kondane Caves Exploration",
+  "Gondeshwar Temple Architecture Tour",
+] as const;
+
+const contactCards: ContactCard[] = [
   {
     icon: Phone,
     title: "Call Us",
-    value: "+91 9420010881",
-    href: "tel:+919420010881",
-    action: "Call now",
-    note: "Best for quick tour questions, availability checks and booking guidance.",
-    valueClassName: "leading-[1.08]",
+    lines: [
+      { text: siteContact.primaryPhone, href: siteContact.primaryPhoneHref },
+      { text: "Mon - Sat, 10am - 7pm" },
+    ],
   },
   {
     icon: WhatsAppIcon,
     title: "WhatsApp",
-    value: "+91 7020402446",
-    href: whatsappUrl,
-    action: "Send a message",
-    note: "Share your travel date, group size and interests in one message.",
-    valueClassName: "leading-[1.08]",
+    lines: [
+      { text: siteContact.whatsappPhone, href: siteContact.whatsappUrl, external: true },
+      { text: "Personal / fastest way to reach us" },
+    ],
   },
   {
     icon: Mail,
     title: "Email",
-    value: "hello@paranjapetours.in",
-    href: "mailto:hello@paranjapetours.in",
-    action: "Write to us",
-    note: "Useful for school trips, custom itineraries and detailed requests.",
-    valueClassName: "break-all text-[1.7rem] leading-[1.04]",
+    lines: [{ text: siteContact.email, href: siteContact.mailtoHref }],
   },
   {
     icon: MapPin,
-    title: "Visit / Base",
-    value: "Avalon, Anandnagar, Sinhagad Road, Pune",
-    href: mapUrl,
-    action: "Open in Maps",
-    note: "Our heritage planning and tour coordination is managed from Pune.",
-    valueClassName: "text-[1.85rem] leading-[1.1]",
+    title: "Office",
+    lines: [{ text: "Avalon, Anandnagar," }, { text: "Sinhagad Road, Pune" }],
+  },
+  {
+    icon: Clock,
+    title: "Working Hours",
+    lines: [{ text: "Office Timings: 11 AM - 4 PM" }, { text: "Sunday: by appointment" }],
+  },
+];
+
+const faqItems = [
+  {
+    question: "How do I book a tour?",
+    answer: "Send an enquiry through this form or WhatsApp us. Our team confirms within a few hours.",
+  },
+  {
+    question: "Do you offer custom private tours?",
+    answer: "Yes - for families, schools and corporate groups. Just tell us your dates and group size.",
+  },
+  {
+    question: "Are tours kid-friendly?",
+    answer: "Most heritage walks are. Each tour page lists the recommended age.",
+  },
+  {
+    question: "What if it rains?",
+    answer: "Monsoon adds magic to many tours. We provide guidance on what to carry and reschedule if conditions are unsafe.",
   },
 ] as const;
 
-const enquiryTypes = [
-  {
-    icon: BookOpen,
-    title: "Tours and Walks",
-    desc: "Fort trails, temple visits, heritage walks and storyteller-led day trips.",
-  },
-  {
-    icon: Users,
-    title: "School and Group Plans",
-    desc: "Student groups, family outings and custom historical study visits.",
-  },
-  {
-    icon: Gift,
-    title: "Shop and Gifting",
-    desc: "Books, maps, keepsakes and group gifting bundles from the shop collection.",
-  },
-  {
-    icon: ScrollText,
-    title: "Custom Requests",
-    desc: "Tell us your date, group size and theme, and we will help shape the plan.",
-  },
-] as const;
+const initialFormState: SimpleContactFormState = {
+  fullName: "",
+  email: "",
+  phone: "",
+  tourInterest: tourInterestOptions[0],
+  preferredDate: "",
+  numberOfPeople: "",
+  message: "",
+};
 
-const planningChecklist = [
-  "Your preferred tour, destination or topic of interest",
-  "Travel date or date range",
-  "Group size and age mix",
-  "Starting city or pickup point",
-  "Any food, walking or accessibility requirements",
-] as const;
+const web3FormsAccessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY?.trim() ?? "";
 
-const cardDelayStyle = (index: number, offset = 0): CSSProperties => ({
-  "--card-delay": `${offset + index * 90}ms`,
-}) as CSSProperties;
+function buildEnquiryMessage(formData: SimpleContactFormState) {
+  const note = formData.message.trim();
+  const details = [
+    `Tour interested in: ${formData.tourInterest}`,
+    formData.preferredDate ? `Preferred date: ${formData.preferredDate}` : undefined,
+    formData.numberOfPeople ? `Number of people: ${formData.numberOfPeople}` : undefined,
+    note ? `Message: ${note}` : undefined,
+  ].filter(Boolean);
+
+  return details.join(". ") || "Tour enquiry submitted from the website contact page.";
+}
+
+function mapToContactEnquiry(formData: SimpleContactFormState): ContactEnquiryInput {
+  return {
+    fullName: formData.fullName,
+    email: formData.email,
+    phone: formData.phone,
+    categoryValue: "tours-and-walks",
+    preferredContactMethod: formData.phone.trim() ? "phone" : "email",
+    organizationName: "",
+    subject: formData.tourInterest,
+    scheduleDetails: formData.preferredDate || "Flexible",
+    groupDetails: formData.numberOfPeople || "Not specified",
+    locationDetails: "Not provided",
+    message: buildEnquiryMessage(formData),
+  };
+}
+
+function buildWeb3FormsPayload(formData: SimpleContactFormState) {
+  return {
+    access_key: web3FormsAccessKey,
+    subject: `New Paranjape Tours enquiry from ${formData.fullName}`,
+    from_name: "Paranjape Tours Website",
+    replyto: formData.email,
+    botcheck: "",
+    name: formData.fullName,
+    email: formData.email,
+    phone: formData.phone,
+    tour_interested_in: formData.tourInterest,
+    preferred_date: formData.preferredDate || "Flexible",
+    number_of_people: formData.numberOfPeople || "Not specified",
+    message: formData.message.trim() || "No additional message provided.",
+  };
+}
+
+async function submitToWeb3Forms(formData: SimpleContactFormState) {
+  if (!web3FormsAccessKey) {
+    return { skipped: true };
+  }
+
+  const response = await fetch("https://api.web3forms.com/submit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(buildWeb3FormsPayload(formData)),
+  });
+
+  const result = await response.json().catch(() => null);
+  const message =
+    result?.message ??
+    result?.body?.message ??
+    "We couldn't send your enquiry email right now.";
+
+  if (!response.ok || result?.success === false) {
+    throw new Error(message);
+  }
+
+  return result;
+}
 
 function Contact() {
+  const [formData, setFormData] = useState<SimpleContactFormState>(initialFormState);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitState, setSubmitState] = useState<{
+    tone: "idle" | "success" | "error";
+    message: string;
+  }>({
+    tone: "idle",
+    message: "",
+  });
+
+  function updateField<K extends keyof SimpleContactFormState>(field: K, value: SimpleContactFormState[K]) {
+    setFormData((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitState({ tone: "idle", message: "" });
+    setIsSubmitting(true);
+
+    try {
+      const [databaseResult, web3FormsResult] = await Promise.allSettled([
+        submitContactEnquiry({
+          data: mapToContactEnquiry(formData),
+        }),
+        submitToWeb3Forms(formData),
+      ]);
+
+      const savedToDatabase = databaseResult.status === "fulfilled";
+      const sentToEmail =
+        web3FormsResult.status === "fulfilled" &&
+        !(typeof web3FormsResult.value === "object" && web3FormsResult.value?.skipped);
+
+      if (!savedToDatabase && !sentToEmail) {
+        const databaseMessage =
+          databaseResult.status === "rejected"
+            ? databaseResult.reason instanceof Error
+              ? databaseResult.reason.message
+              : "We couldn't save your enquiry."
+            : "";
+        const emailMessage =
+          web3FormsResult.status === "rejected"
+            ? web3FormsResult.reason instanceof Error
+              ? web3FormsResult.reason.message
+              : "We couldn't send your enquiry email."
+            : "";
+
+        throw new Error(emailMessage || databaseMessage || "We couldn't submit your enquiry right now.");
+      }
+
+      const referenceNumber =
+        databaseResult.status === "fulfilled" ? Number(databaseResult.value?.enquiryId ?? 0) : 0;
+
+      setSubmitState({
+        tone: "success",
+        message:
+          savedToDatabase && sentToEmail
+            ? referenceNumber
+              ? `Thanks. Your enquiry was emailed and saved successfully. Reference #${referenceNumber}.`
+              : "Thanks. Your enquiry was emailed and saved successfully."
+            : sentToEmail
+              ? "Thanks. Your enquiry email was sent successfully."
+              : referenceNumber
+                ? `Thanks. Your enquiry was saved successfully. Reference #${referenceNumber}.`
+                : "Thanks. Your enquiry was saved successfully.",
+      });
+      setFormData(initialFormState);
+    } catch (error) {
+      setSubmitState({
+        tone: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : `We couldn't send your enquiry right now. Please email ${siteContact.email}.`,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <Layout>
       <PageBanner
-        title="Contact Paranjape Tours"
-        subtitle="Call, WhatsApp or email us for heritage tours, school groups, shop orders and custom travel plans."
+        title="Get in Touch"
+        subtitle="Tell us where your curiosity is taking you next."
         crumbs={[{ label: "Home", to: "/" }, { label: "Contact" }]}
-        image={heroWalk}
       />
 
-      <section className="container-prose py-20 grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
-        <div>
-          <span className="section-eyebrow">Start the Conversation</span>
-          <h2 className="mt-4 font-serif text-3xl md:text-5xl text-primary">
-            Tell us what kind of journey you want to plan.
-          </h2>
-          <p className="mt-4 text-foreground/80 leading-relaxed">
-            Whether you are planning a heritage walk, a student group visit, a family trip or a gifting enquiry,
-            this is the best place to reach us. Share the basics of your plan and we will guide you to the right
-            next step.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <a
-              href="tel:+919420010881"
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-[var(--shadow-soft)]"
-            >
-              Call Now <Phone size={16} />
-            </a>
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-medium text-primary hover:border-gold"
-            >
-              WhatsApp Us <WhatsAppIcon size={16} />
-            </a>
-          </div>
-        </div>
-
-        <div
-          className="site-card rounded-[2rem] border border-gold/35 bg-[var(--gradient-paper)] p-8 shadow-[var(--shadow-elegant)]"
-          style={cardDelayStyle(1)}
+      <section className="container-prose grid gap-10 py-16 lg:grid-cols-[1.3fr_1fr]">
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-2xl border border-border bg-card p-7 shadow-[var(--shadow-soft)] md:p-9"
         >
-          <div className="site-card-content">
-            <p className="text-xs uppercase tracking-[0.24em] text-gold-foreground">Helpful to include</p>
-            <h3 className="mt-3 font-serif text-3xl text-primary">A quicker reply starts with a clearer enquiry.</h3>
-            <ul className="mt-6 space-y-3 text-sm text-foreground/80">
-              {planningChecklist.map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <ArrowRight size={16} className="mt-0.5 shrink-0 text-gold" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
+          <span className="section-eyebrow">Send Enquiry</span>
+          <h2 className="mt-3 font-serif text-3xl text-primary">Plan your heritage journey</h2>
 
-      <section className="bg-[color-mix(in_oklab,var(--secondary)_55%,var(--background))] py-20">
-        <div className="container-prose">
-          <div className="text-center mb-12">
-            <span className="section-eyebrow">Reach Us</span>
-            <h2 className="mt-3 font-serif text-3xl md:text-5xl text-primary">Choose the contact method that fits you best.</h2>
-          </div>
-
-          <div className="site-card-grid grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {contactMethods.map((item, index) => (
-              <a
-                key={item.title}
-                href={item.href}
-                target={item.href.startsWith("http") ? "_blank" : undefined}
-                rel={item.href.startsWith("http") ? "noreferrer" : undefined}
-                className="site-card h-full rounded-3xl border border-border bg-card p-7 text-left hover-lift"
-                style={cardDelayStyle(index)}
-              >
-                <div className="site-card-icon inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gold/15 text-primary">
-                  <item.icon size={22} />
-                </div>
-                <div className="site-card-content flex h-full min-w-0 flex-col">
-                  <p className="mt-5 text-xs uppercase tracking-[0.24em] text-muted-foreground">{item.title}</p>
-                  <h3
-                    className={`mt-2 max-w-full font-serif text-2xl text-primary ${item.valueClassName ?? "leading-[1.12]"}`}
-                  >
-                    {item.value}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.note}</p>
-                  <span className="site-card-link mt-auto inline-flex items-center gap-2 pt-5 text-sm font-medium text-primary">
-                    {item.action}
-                    <ArrowRight size={14} />
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="container-prose py-20 grid gap-10 lg:grid-cols-[1fr_1.1fr]">
-        <div>
-          <span className="section-eyebrow">Enquiries</span>
-          <h2 className="mt-3 font-serif text-3xl md:text-5xl text-primary">We can help with more than one kind of request.</h2>
-          <p className="mt-4 text-muted-foreground leading-relaxed">
-            If you are not sure which message to send, just tell us what you are trying to plan. We can help you sort
-            out tour fit, group details, logistics and gifting options from one conversation.
-          </p>
-        </div>
-
-        <div className="site-card-grid grid gap-6 sm:grid-cols-2">
-          {enquiryTypes.map((item, index) => (
-            <div
-              key={item.title}
-              className="site-card rounded-3xl border border-border bg-card p-7 hover-lift"
-              style={cardDelayStyle(index, 90)}
-            >
-              <div className="site-card-icon inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gold/15 text-primary">
-                <item.icon size={22} />
-              </div>
-              <div className="site-card-content">
-                <h3 className="mt-5 font-serif text-2xl text-primary">{item.title}</h3>
-                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
-              </div>
+          <div className="mt-7 grid gap-5 sm:grid-cols-2">
+            <InputField
+              id="name"
+              label="Full Name"
+              value={formData.fullName}
+              onChange={(value) => updateField("fullName", value)}
+              required
+              autoComplete="name"
+            />
+            <InputField
+              id="email"
+              label="Email"
+              type="email"
+              value={formData.email}
+              onChange={(value) => updateField("email", value)}
+              required
+              autoComplete="email"
+            />
+            <InputField
+              id="phone"
+              label="Phone"
+              type="tel"
+              value={formData.phone}
+              onChange={(value) => updateField("phone", value)}
+              autoComplete="tel"
+            />
+            <SelectField
+              label="Tour Interested In"
+              value={formData.tourInterest}
+              onChange={(value) => updateField("tourInterest", value)}
+              options={tourInterestOptions}
+            />
+            <InputField
+              id="date"
+              label="Preferred Date"
+              type="date"
+              value={formData.preferredDate}
+              onChange={(value) => updateField("preferredDate", value)}
+            />
+            <InputField
+              id="people"
+              label="Number of People"
+              type="number"
+              value={formData.numberOfPeople}
+              onChange={(value) => updateField("numberOfPeople", value)}
+              min={1}
+            />
+            <div className="sm:col-span-2">
+              <TextareaField
+                label="Message"
+                value={formData.message}
+                onChange={(value) => updateField("message", value)}
+                placeholder="Tell us a little about who's travelling and what you'd love to experience..."
+                rows={4}
+              />
             </div>
+          </div>
+
+          {submitState.tone !== "idle" && (
+            <div
+              className={`mt-5 rounded-xl px-4 py-3 text-sm ${
+                submitState.tone === "success"
+                  ? "border border-emerald-300/50 bg-emerald-50 text-emerald-800"
+                  : "border border-destructive/30 bg-destructive/10 text-destructive"
+              }`}
+            >
+              {submitState.message}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="mt-7 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-[var(--shadow-soft)] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            <Send size={16} />
+            {isSubmitting ? "Sending..." : "Send Enquiry"}
+          </button>
+        </form>
+
+        <div className="space-y-5">
+          {contactCards.map((card) => (
+            <ContactInfoCard key={card.title} card={card} />
           ))}
         </div>
       </section>
 
-      <section className="bg-primary py-20 text-primary-foreground">
-        <div className="container-prose text-center">
-          <p className="text-xs uppercase tracking-[0.24em] text-gold">Keep Exploring</p>
-          <h2 className="mt-3 font-serif text-3xl md:text-5xl">Prefer to browse first?</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-primary-foreground/80">
-            Explore the tour collection or the heritage shop, then come back with the options that interest you most.
-          </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              to="/tours"
-              className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-semibold text-gold-foreground shadow-[var(--shadow-gold)]"
-            >
-              Browse Tours <ArrowRight size={16} />
-            </Link>
-            <Link
-              to="/shop"
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3 text-sm font-medium text-primary-foreground"
-            >
-              Visit Shop <ArrowRight size={16} />
-            </Link>
-          </div>
+      <section className="container-prose pb-16">
+        <div className="aspect-[16/7] overflow-hidden rounded-2xl border border-border bg-secondary">
+          <iframe
+            title="Office location"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=73.83%2C18.50%2C73.88%2C18.55&layer=mapnik"
+            className="h-full w-full"
+            loading="lazy"
+          />
+        </div>
+      </section>
+
+      <section className="container-prose pb-20">
+        <h2 className="text-center font-serif text-3xl text-primary md:text-4xl">Frequently Asked Questions</h2>
+        <div className="heritage-divider my-5">
+          <span />
+        </div>
+        <div className="mx-auto grid max-w-4xl gap-4 md:grid-cols-2">
+          {faqItems.map((item) => (
+            <div key={item.question} className="rounded-xl border border-border bg-card p-5">
+              <h3 className="font-medium text-primary">{item.question}</h3>
+              <p className="mt-2 text-sm text-foreground/80">{item.answer}</p>
+            </div>
+          ))}
         </div>
       </section>
     </Layout>
+  );
+}
+
+function ContactInfoCard({ card }: { card: ContactCard }) {
+  const Icon = card.icon;
+
+  return (
+    <div className="flex gap-4 rounded-2xl border border-border bg-card p-5">
+      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gold/15 text-primary">
+        <Icon size={18} />
+      </span>
+      <div>
+        <h4 className="font-serif text-lg text-primary">{card.title}</h4>
+        <div className="mt-0.5 space-y-1">
+          {card.lines.map((line) =>
+            line.href ? (
+              <a
+                key={`${card.title}-${line.text}`}
+                href={line.href}
+                target={line.external ? "_blank" : undefined}
+                rel={line.external ? "noreferrer" : undefined}
+                className="block text-sm text-foreground/80 transition-colors hover:text-primary"
+              >
+                {line.text}
+              </a>
+            ) : (
+              <p key={`${card.title}-${line.text}`} className="text-sm text-foreground/80">
+                {line.text}
+              </p>
+            ),
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InputField({
+  id,
+  label,
+  value,
+  onChange,
+  type = "text",
+  required,
+  autoComplete,
+  min,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  required?: boolean;
+  autoComplete?: string;
+  min?: number;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted-foreground">
+        {label}
+        {required && <span className="text-destructive"> *</span>}
+      </label>
+      <input
+        id={id}
+        type={type}
+        required={required}
+        value={value}
+        min={min}
+        autoComplete={autoComplete}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full rounded-md border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+      />
+    </div>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: readonly string[];
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted-foreground">{label}</label>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full rounded-md border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function TextareaField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  rows: number;
+}) {
+  return (
+    <div>
+      <label className="mb-2 block text-xs uppercase tracking-[0.2em] text-muted-foreground">{label}</label>
+      <textarea
+        value={value}
+        rows={rows}
+        placeholder={placeholder}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full rounded-md border border-input bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+      />
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, Mail, MapPin, Phone, Youtube } from "lucide-react";
+import { siteContact } from "@/data/siteContact";
 import { WhatsAppIcon } from "./WhatsAppIcon";
 
 const socialLinks = [
@@ -61,19 +62,37 @@ export function Footer() {
           <ul className="space-y-3 text-sm text-foreground/80">
             <li className="flex items-center gap-2">
               <Phone size={16} className="text-gold" />
-              <span>+91 9420010881</span>
+              <a href={siteContact.primaryPhoneHref} className="transition-colors hover:text-primary">
+                {siteContact.primaryPhone}
+              </a>
             </li>
             <li className="flex items-center gap-2">
               <WhatsAppIcon size={16} className="text-gold" />
-              <span>Personal: +91 7020402446</span>
+              <a
+                href={siteContact.whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="transition-colors hover:text-primary"
+              >
+                Personal: {siteContact.whatsappPhone}
+              </a>
             </li>
             <li className="flex items-center gap-2">
               <Mail size={16} className="text-gold" />
-              <span>hello@paranjapetours.in</span>
+              <a href={siteContact.mailtoHref} className="break-all transition-colors hover:text-primary">
+                {siteContact.email}
+              </a>
             </li>
             <li className="flex items-start gap-2">
               <MapPin size={16} className="text-gold mt-0.5" />
-              <span>Avalon, Anandnagar, Sinhagad Road, Pune</span>
+              <a
+                href={siteContact.mapUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="transition-colors hover:text-primary"
+              >
+                {siteContact.address}
+              </a>
             </li>
           </ul>
           <div className="flex gap-3 mt-5">
