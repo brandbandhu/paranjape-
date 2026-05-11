@@ -112,8 +112,6 @@ const initialFormState: SimpleContactFormState = {
   message: "",
 };
 
-const web3FormsAccessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY?.trim() ?? "";
-
 function buildEnquiryMessage(formData: SimpleContactFormState) {
   const note = formData.message.trim();
   const details = [
@@ -142,50 +140,6 @@ function mapToContactEnquiry(formData: SimpleContactFormState): ContactEnquiryIn
   };
 }
 
-function buildWeb3FormsPayload(formData: SimpleContactFormState) {
-  return {
-    access_key: web3FormsAccessKey,
-    subject: `New Paranjape Tours enquiry from ${formData.fullName}`,
-    from_name: "Paranjape Tours Website",
-    replyto: formData.email,
-    botcheck: "",
-    name: formData.fullName,
-    email: formData.email,
-    phone: formData.phone,
-    tour_interested_in: formData.tourInterest,
-    preferred_date: formData.preferredDate || "Flexible",
-    number_of_people: formData.numberOfPeople || "Not specified",
-    message: formData.message.trim() || "No additional message provided.",
-  };
-}
-
-async function submitToWeb3Forms(formData: SimpleContactFormState) {
-  if (!web3FormsAccessKey) {
-    return { skipped: true };
-  }
-
-  const response = await fetch("https://api.web3forms.com/submit", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify(buildWeb3FormsPayload(formData)),
-  });
-
-  const result = await response.json().catch(() => null);
-  const message =
-    result?.message ??
-    result?.body?.message ??
-    "We couldn't send your enquiry email right now.";
-
-  if (!response.ok || result?.success === false) {
-    throw new Error(message);
-  }
-
-  return result;
-}
-
 function Contact() {
   const [formData, setFormData] = useState<SimpleContactFormState>(initialFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -210,37 +164,13 @@ function Contact() {
     setIsSubmitting(true);
 
     try {
-      const [databaseResult, web3FormsResult] = await Promise.allSettled([
-        submitContactEnquiry({
-          data: mapToContactEnquiry(formData),
-        }),
-        submitToWeb3Forms(formData),
-      ]);
+      const result = await submitContactEnquiry({
+        data: mapToContactEnquiry(formData),
+      });
 
-      const savedToDatabase = databaseResult.status === "fulfilled";
-      const sentToEmail =
-        web3FormsResult.status === "fulfilled" &&
-        !(typeof web3FormsResult.value === "object" && web3FormsResult.value?.skipped);
-
-      if (!savedToDatabase && !sentToEmail) {
-        const databaseMessage =
-          databaseResult.status === "rejected"
-            ? databaseResult.reason instanceof Error
-              ? databaseResult.reason.message
-              : "We couldn't save your enquiry."
-            : "";
-        const emailMessage =
-          web3FormsResult.status === "rejected"
-            ? web3FormsResult.reason instanceof Error
-              ? web3FormsResult.reason.message
-              : "We couldn't send your enquiry email."
-            : "";
-
-        throw new Error(emailMessage || databaseMessage || "We couldn't submit your enquiry right now.");
-      }
-
-      const referenceNumber =
-        databaseResult.status === "fulfilled" ? Number(databaseResult.value?.enquiryId ?? 0) : 0;
+      const savedToDatabase = Boolean(result?.savedToDatabase);
+      const sentToEmail = Boolean(result?.sentToEmail);
+      const referenceNumber = Number(result?.enquiryId ?? 0);
 
       setSubmitState({
         tone: "success",

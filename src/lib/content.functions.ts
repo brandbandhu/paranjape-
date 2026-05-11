@@ -2,7 +2,6 @@ import type { ContactEnquiryInput } from "@/data/contactEnquiry";
 import { createServerFn } from "@tanstack/react-start";
 import { loginWithCredentials, logoutCurrentAdmin, requireAdmin } from "@/lib/auth.server";
 import {
-  createContactEnquiry,
   deleteBlogPostById,
   deleteCategoryById,
   deleteShopItemById,
@@ -15,6 +14,7 @@ import {
   type SaveShopItemInput,
   type SaveTestimonialInput,
   type SaveTourInput,
+  submitPublicContactEnquiry,
   upsertBlogPost,
   upsertCategory,
   upsertShopItem,
@@ -119,5 +119,5 @@ export const deleteBlogPost = createServerFn({ method: "POST" })
 export const submitContactEnquiry = createServerFn({ method: "POST" })
   .inputValidator((data: ContactEnquiryInput) => data)
   .handler(async ({ data }) => {
-    return createContactEnquiry(data);
+    return submitPublicContactEnquiry(data);
   });

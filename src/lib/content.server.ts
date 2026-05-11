@@ -317,6 +317,8 @@ export type SaveBlogPostInput = {
   publishedOn?: string;
 };
 
+type NormalizedContactEnquiryInput = ReturnType<typeof normalizeContactEnquiryInput>;
+
 function looksLikeEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
@@ -395,6 +397,58 @@ function normalizeContactEnquiryInput(input: ContactEnquiryInput) {
     locationDetails,
     message,
   };
+}
+
+function getWeb3FormsAccessKey() {
+  return (process.env.WEB3FORMS_ACCESS_KEY ?? process.env.VITE_WEB3FORMS_ACCESS_KEY ?? "").trim();
+}
+
+function buildContactEnquiryEmailPayload(normalized: NormalizedContactEnquiryInput) {
+  return {
+    access_key: getWeb3FormsAccessKey(),
+    subject: `New Paranjape Tours enquiry from ${normalized.fullName}`,
+    from_name: "Paranjape Tours Website",
+    replyto: normalized.email,
+    name: normalized.fullName,
+    email: normalized.email,
+    phone: normalized.phone || "Not provided",
+    enquiry_category: normalized.category.label,
+    preferred_contact_method: normalized.preferredContactMethod.label,
+    organization_name: normalized.organizationName || "Not provided",
+    enquiry_subject: normalized.subject,
+    schedule_details: normalized.scheduleDetails,
+    group_details: normalized.groupDetails,
+    location_details: normalized.locationDetails,
+    message: normalized.message,
+  };
+}
+
+async function sendContactEnquiryEmail(normalized: NormalizedContactEnquiryInput) {
+  const accessKey = getWeb3FormsAccessKey();
+  if (!accessKey) {
+    return { skipped: true };
+  }
+
+  const response = await fetch("https://api.web3forms.com/submit", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(buildContactEnquiryEmailPayload(normalized)),
+  });
+
+  const result = await response.json().catch(() => null);
+  const message =
+    result?.message ??
+    result?.body?.message ??
+    "We couldn't send your enquiry email right now.";
+
+  if (!response.ok || result?.success === false) {
+    throw new Error(message);
+  }
+
+  return result;
 }
 
 async function getCategoryLabel(categoryId?: number) {
@@ -706,9 +760,7 @@ export async function deleteBlogPostById(id: number) {
   await pool.execute("DELETE FROM blogs WHERE id = ?", [id]);
 }
 
-export async function createContactEnquiry(input: ContactEnquiryInput) {
-  const normalized = normalizeContactEnquiryInput(input);
-
+async function createContactEnquiryRecord(normalized: NormalizedContactEnquiryInput) {
   try {
     const pool = await getPool();
     const [result] = await pool.execute<any>(
@@ -755,4 +807,45 @@ export async function createContactEnquiry(input: ContactEnquiryInput) {
       `We couldn't save your enquiry right now. Please email ${siteContact.email} or call ${siteContact.primaryPhone}.`,
     );
   }
+}
+
+export async function createContactEnquiry(input: ContactEnquiryInput) {
+  return createContactEnquiryRecord(normalizeContactEnquiryInput(input));
+}
+
+export async function submitPublicContactEnquiry(input: ContactEnquiryInput) {
+  const normalized = normalizeContactEnquiryInput(input);
+  const [databaseResult, emailResult] = await Promise.allSettled([
+    createContactEnquiryRecord(normalized),
+    sendContactEnquiryEmail(normalized),
+  ]);
+
+  const savedToDatabase = databaseResult.status === "fulfilled";
+  const sentToEmail =
+    emailResult.status === "fulfilled" &&
+    !(typeof emailResult.value === "object" && emailResult.value?.skipped);
+
+  if (!savedToDatabase && !sentToEmail) {
+    const databaseMessage =
+      databaseResult.status === "rejected"
+        ? databaseResult.reason instanceof Error
+          ? databaseResult.reason.message
+          : "We couldn't save your enquiry."
+        : "";
+    const emailMessage =
+      emailResult.status === "rejected"
+        ? emailResult.reason instanceof Error
+          ? emailResult.reason.message
+          : "We couldn't send your enquiry email."
+        : "";
+
+    throw new Error(emailMessage || databaseMessage || "We couldn't submit your enquiry right now.");
+  }
+
+  return {
+    success: true,
+    savedToDatabase,
+    sentToEmail,
+    enquiryId: databaseResult.status === "fulfilled" ? Number(databaseResult.value?.enquiryId ?? 0) : 0,
+  };
 }
