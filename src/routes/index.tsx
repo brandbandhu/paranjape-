@@ -20,6 +20,12 @@ import heroFort from "@/assets/hero-fort.jpg";
 import heroTemple from "@/assets/hero-temple.jpg";
 import heroWalk from "@/assets/hero-walk.jpg";
 import heroStory from "@/assets/hero-story.jpg";
+import shivneriMain from "@/assets/gallery/shivneri-main.jpg";
+import shaniwarFront from "@/assets/gallery/shaniwar-front.jpg";
+import sinhagadGate from "@/assets/gallery/sinhagad-gate.jpg";
+import kondaneChaitya from "@/assets/gallery/kondane-chaitya.jpg";
+import gondeshwarComplex from "@/assets/gallery/gondeshwar-complex.jpg";
+import varanasiDashashwamedh from "@/assets/gallery/varanasi-dashashwamedh.jpg";
 
 export const Route = createFileRoute("/")({
   loader: () => getPublicSiteContent(),
@@ -106,6 +112,33 @@ const featuredTours = [
   { slug: "shivneri-fort-tour", tagLabel: "One Day Tour" },
   { slug: "shaniwar-wada-heritage-walk", tagLabel: "Heritage Walk" },
   { slug: "hampi-badami-heritage-trip", tagLabel: "Multiple Day Tour" },
+] as const;
+
+const homeGallery = [
+  {
+    image: shivneriMain,
+    title: "Shivneri Fort",
+  },
+  {
+    image: shaniwarFront,
+    title: "Shaniwar Wada",
+  },
+  {
+    image: sinhagadGate,
+    title: "Sinhagad",
+  },
+  {
+    image: kondaneChaitya,
+    title: "Kondane Caves",
+  },
+  {
+    image: gondeshwarComplex,
+    title: "Gondeshwar Temple",
+  },
+  {
+    image: varanasiDashashwamedh,
+    title: "Varanasi Ghats",
+  },
 ] as const;
 
 function Home() {
@@ -257,6 +290,41 @@ function Home() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mt-14">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="section-eyebrow">Gallery</span>
+            <h3 className="mt-3 font-serif text-2xl text-primary md:text-4xl">
+              Glimpses from the journeys we love leading
+            </h3>
+            <p className="mt-3 text-muted-foreground">
+              Six frames from forts, temple complexes, caves and riverfront stories across our
+              heritage routes.
+            </p>
+          </div>
+
+          <div className="site-card-grid mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {homeGallery.map((item) => (
+              <figure
+                key={item.title}
+                className="site-card group rounded-[1.75rem] border border-border bg-card shadow-[var(--shadow-soft)]"
+              >
+                <div className="site-card-media relative aspect-[4/3] overflow-hidden">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent" />
+                </div>
+                <figcaption className="site-card-content absolute inset-x-0 bottom-0 p-5 text-primary-foreground">
+                  <h4 className="text-2xl leading-tight">{item.title}</h4>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       </Section>
 
