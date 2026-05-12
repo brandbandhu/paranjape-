@@ -11,7 +11,7 @@ export const Route = createFileRoute("/blog")({
   head: () => ({
     meta: [
       { title: "Blog - Paranjape Tours Journal" },
-      { name: "description", content: "Long-form notes on Maharashtra's forts, temples, lanes and the people who keep them alive." },
+      { name: "description", content: "Long-form notes on forts, temples, lanes and the people who keep them alive." },
       { property: "og:title", content: "Paranjape Tours Blog" },
       { property: "og:description", content: "Heritage essays and travel notes." },
     ],

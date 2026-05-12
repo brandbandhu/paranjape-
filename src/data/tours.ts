@@ -302,7 +302,7 @@ export const tours: Tour[] = [
     itinerary: [
       { time: "07:00", title: "Depart", desc: "Drive from Pune to Sinnar." },
       { time: "11:00", title: "Temple study", desc: "Detailed guided tour." },
-      { time: "14:00", title: "Lunch", desc: "Traditional Maharashtrian thali." },
+      { time: "14:00", title: "Lunch", desc: "Traditional regional thali." },
       { time: "17:00", title: "Return", desc: "Drive back." },
     ],
     inclusions: ["Transport", "Expert guide", "Breakfast & lunch"],
@@ -539,8 +539,8 @@ export const upcomingTours = [
 
 export const blogPosts = [
   {
-    slug: "legacy-of-maharashtra-forts",
-    title: "The Legacy of Maharashtra Forts",
+    slug: "legacy-of-historic-forts",
+    title: "The Legacy of Historic Forts",
     date: "April 12, 2026",
     category: "Forts",
     excerpt:
@@ -573,7 +573,7 @@ export const blogPosts = [
   },
   {
     slug: "student-heritage-tours",
-    title: "Student Heritage Tours in Maharashtra",
+    title: "Student Heritage Tours That Make History Stick",
     date: "Feb 28, 2026",
     category: "Education",
     excerpt: "How a well-designed heritage trip can change a student's relationship with history.",

@@ -11,7 +11,7 @@ export const Route = createFileRoute("/upcoming")({
   head: () => ({
     meta: [
       { title: "Upcoming Heritage Tours — Paranjape Tours" },
-      { name: "description", content: "Join our upcoming heritage walks, fort trails and temple tours across Maharashtra." },
+      { name: "description", content: "Join our upcoming heritage walks, fort trails and temple tours." },
       { property: "og:title", content: "Upcoming Tours" },
       { property: "og:description", content: "Reserve your seat on the next heritage journey." },
     ],
@@ -29,7 +29,7 @@ function Upcoming() {
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
   return (
     <Layout>
-      <PageBanner title="Upcoming Tours" subtitle="Plan your next journey through Maharashtra's living heritage."
+      <PageBanner title="Upcoming Tours" subtitle="Plan your next journey through forts, temples and living stories."
         crumbs={[{ label: "Home", to: "/" }, { label: "Upcoming" }]} image={heroTemple} />
 
       <section className="container-prose py-16">

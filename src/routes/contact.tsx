@@ -14,7 +14,7 @@ export const Route = createFileRoute("/contact")({
       { title: "Contact - Paranjape Tours" },
       {
         name: "description",
-        content: "Plan your Maharashtra heritage journey. Talk to our team via phone, email or WhatsApp.",
+        content: "Plan your heritage journey. Talk to our team via phone, email or WhatsApp.",
       },
       { property: "og:title", content: "Contact Paranjape Tours" },
       { property: "og:description", content: "We'd love to design your next heritage trip." },

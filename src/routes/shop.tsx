@@ -29,8 +29,7 @@ export const Route = createFileRoute("/shop")({
       { property: "og:title", content: "Paranjape Tours Shop" },
       {
         property: "og:description",
-        content:
-          "Take Maharashtra's stories home with curated keepsakes, study kits and travel gifts.",
+        content: "Take history's stories home with curated keepsakes, study kits and travel gifts.",
       },
     ],
   }),
@@ -53,7 +52,7 @@ const collections = [
   {
     icon: Gift,
     title: "Souvenirs and Gifts",
-    desc: "Thoughtful keepsakes inspired by Maharashtra's architecture, legends and travel memories.",
+    desc: "Thoughtful keepsakes inspired by architecture, legends and travel memories.",
     points: ["Gift-ready sets", "Event mementos", "Custom group orders"],
   },
 ] as const;
@@ -87,7 +86,7 @@ function Shop() {
     <Layout>
       <PageBanner
         title="Heritage Shop"
-        subtitle="Books, maps, keepsakes and gifting ideas inspired by Maharashtra's forts, temples and old city stories."
+        subtitle="Books, maps, keepsakes and gifting ideas inspired by forts, temples and old city stories."
         crumbs={[{ label: "Home", to: "/" }, { label: "Shop" }]}
         image={heroTemple}
       />

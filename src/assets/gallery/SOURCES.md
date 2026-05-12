@@ -13,11 +13,11 @@ Wikimedia Commons source pages for the added tour and gallery photos:
 - `parvati-entrance.jpg`: https://commons.wikimedia.org/wiki/File:Parvati_Hill_temple_complex_entrance,_Pune.jpg
 - `parvati-shikhara.jpg`: https://commons.wikimedia.org/wiki/File:Shikhara_of_temples_on_Parvati_Hill,_Pune_(3).jpg
 - `kondane-side-view.jpg`: https://commons.wikimedia.org/wiki/File:011_Side_View_(33308156190).jpg
-- `kondane-chaitya.jpg`: https://commons.wikimedia.org/wiki/File:Kondane_caves_-Kondhane_-Maharashtra_-N-MH-M61.jpg
+- `kondane-chaitya.jpg`: https://commons.wikimedia.org/wiki/Category:Kondane_Caves
 - `kondane-overview.jpg`: https://commons.wikimedia.org/wiki/File:Kondane_cave_overview.jpg
 - `gondeshwar-complex.jpg`: https://commons.wikimedia.org/wiki/File:Gondeshwar_temple,_Sinnar.jpg
 - `gondeshwar-angle.jpg`: https://commons.wikimedia.org/wiki/File:Gondeshwar_temple,_Sinnar_PSK4589.jpg
-- `gondeshwar-detail.jpg`: https://commons.wikimedia.org/wiki/File:Gondeshwar_Temple-Sinnar-Nashik-Maharashtra-6.jpg
+- `gondeshwar-detail.jpg`: https://commons.wikimedia.org/wiki/Category:Gondeshwar_temple,_Sinnar
 - `hampi-vitthala.jpg`: https://commons.wikimedia.org/wiki/File:Hampi_Vitthala_Temple_3465.jpg
 - `hampi-pillars.jpg`: https://commons.wikimedia.org/wiki/File:Architecture_of_Vitthala_Temple,_Hampi.jpg
 - `badami-cave.jpg`: https://commons.wikimedia.org/wiki/File:Cave_Temple_3,_Badami.JPG

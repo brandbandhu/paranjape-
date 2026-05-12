@@ -19,8 +19,8 @@ export const Route = createFileRoute("/tours/")({
   head: () => ({
     meta: [
       { title: "Heritage Tours — Paranjape Tours" },
-      { name: "description", content: "Browse heritage walks, fort tours, temple journeys and curated experiences across Maharashtra." },
-      { property: "og:title", content: "Heritage Tours of Maharashtra" },
+      { name: "description", content: "Browse heritage walks, fort tours, temple journeys and curated experiences." },
+      { property: "og:title", content: "Heritage Tours by Paranjape Tours" },
       { property: "og:description", content: "Walks, forts, temples and cultural journeys curated by storytellers." },
     ],
   }),

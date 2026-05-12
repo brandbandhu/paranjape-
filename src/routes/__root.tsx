@@ -29,8 +29,8 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Paranjape Tours — Heritage Storytelling Travel" },
-      { name: "description", content: "Curated heritage walks, fort tours and cultural journeys across Maharashtra." },
+      { title: "Paranjape Tours - Heritage Storytelling Travel" },
+      { name: "description", content: "Curated heritage walks, fort tours and cultural journeys." },
       { name: "author", content: "Paranjape Tours" },
       { property: "og:title", content: "Paranjape Tours" },
       { property: "og:description", content: "Travel through time, not just places." },

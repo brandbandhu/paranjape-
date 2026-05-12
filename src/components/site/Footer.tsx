@@ -35,7 +35,7 @@ export function Footer() {
             <span className="font-serif text-xl text-primary">Paranjape Tours</span>
           </div>
           <p className="text-sm leading-9 text-foreground/85 [text-align:justify] sm:leading-8">
-            A heritage storytelling travel experience brand &mdash; helping you rediscover Maharashtra through forts,
+            A heritage storytelling travel experience brand &mdash; helping you rediscover history through forts,
             temples, walks and stories.
           </p>
         </div>
@@ -137,7 +137,7 @@ export function Footer() {
         </div>
       </div>
       <div className="relative z-10 border-t border-border/80 bg-[color-mix(in_oklab,var(--background)_74%,transparent)] px-4 py-5 text-center text-[0.82rem] font-medium leading-6 text-foreground/75 backdrop-blur-sm">
-        &copy; {new Date().getFullYear()} Paranjape Tours. Crafted with reverence for Maharashtra&apos;s heritage.
+        &copy; {new Date().getFullYear()} Paranjape Tours. Crafted with reverence for living heritage.
       </div>
     </footer>
   );
