@@ -1,4 +1,5 @@
-import { blogPosts as staticBlogPosts, tours as staticTours } from "@/data/tours";
+import { blogPosts as staticBlogPosts } from "@/data/blogPosts";
+import { tours as staticTours } from "@/data/tours";
 import {
   findEnquiryCategoryConfig,
   findPreferredContactMethod,

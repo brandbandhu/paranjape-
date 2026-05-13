@@ -24,7 +24,14 @@ const stats = [
   { v: "4.5", l: "Experience Rating" },
 ];
 
-const guides = [{ name: "Atul P." }, { name: "Snehal K." }, { name: "Rohan M." }, { name: "Priya D." }];
+const guides = [
+  { name: "Archana Kulkarni", role: "MA Indology, Diploma in Tourism", desc: "A travel enthusiast with a passion for history. Excellent team leader" },
+  { name: "Aditya Naniwadekar", role: "Botanist", desc: "Core wildlife expert and 15+ years of experience in Travel Industry" },
+  { name: "Amogh Vaidya", role: "MA Indology, MA Sanskrit, pursuing PHD", desc: "8+ years of experience in the heritage segment" },
+  { name: "Gayatri Bhalerao", role: "MA Indology", desc: "3+ years of experience in the heritage segment" },
+  { name: "Bakul Joshi", role: "MA Indology", desc: "5+ years of experience in the heritage segment" },
+  { name: "Mukta Gogate", role: "CA", desc: "Finance expert by profession but handles back office effectively" }
+];
 
 function About() {
   return (
@@ -51,21 +58,19 @@ function About() {
             Born from a love for history, architecture and lived experience.
           </h2>
           <p className="mt-4 text-justify leading-relaxed text-foreground/80">
-            I started Paranjape Tours & Travels with a simple belief: forts, temples and old cities
-            deserve to be understood, not just visited. What began as a personal passion for
-            historical research and Indian temple architecture gradually became a venture built around
-            careful storytelling, field study and meaningful travel.
+            Paranjape Tours & Travels began with a simple belief: forts, temples and historic cities deserve to be understood, not merely visited.
           </p>
           <p className="mt-4 text-justify leading-relaxed text-foreground/80">
-            My work draws from years of reading, site visits and close attention to how architecture,
-            politics, devotion and daily life shape one another. That is why our journeys move beyond
-            sightseeing into interpretation - helping travellers notice not only what they see, but
-            why it matters.
+            What started as a personal passion for Indian history, temple architecture and historical research gradually evolved into a venture dedicated to meaningful heritage travel — built on careful storytelling, field study and genuine curiosity about India’s past.
           </p>
           <p className="mt-4 text-justify leading-relaxed text-foreground/80">
-            Today, we design thoughtful small-group heritage walks, fort trails, architecture studies
-            and educational journeys for families, students, researchers and curious travellers who
-            want to experience history with depth, accuracy and wonder.
+            Our work draws from years of reading, research and on-ground exploration. Through architecture, inscriptions, landscapes and forgotten stories, we try to understand how politics, devotion, trade and everyday life shaped one another across centuries.
+          </p>
+          <p className="mt-4 text-justify leading-relaxed text-foreground/80">
+            That is why our journeys go beyond conventional sightseeing. Whether it is a fort trail in Maharashtra, a temple study tour, or a heritage walk through an old city, we focus on interpretation as much as experience — helping travellers notice not only what they see, but why it matters.
+          </p>
+          <p className="mt-4 text-justify leading-relaxed text-foreground/80">
+            Today, we design thoughtful small-group journeys for families, students, researchers and curious travellers who seek depth, accuracy and a deeper connection with India’s cultural and historical heritage.
           </p>
         </div>
       </section>
@@ -76,17 +81,17 @@ function About() {
             {
               icon: Compass,
               title: "Our Vision",
-              desc: "To preserve and present historical heritage through meaningful tourism experiences that connect travellers with the stories, culture and architectural legacy of India.",
+              desc: "To reconnect people with India’s civilisational heritage by transforming travel into a journey of understanding, curiosity and discovery.",
             },
             {
               icon: Sparkles,
               title: "Our Mission",
-              desc: "To educate people through highly curated, historically grounded travel experiences and local walks rooted in deep research.",
+              desc: "To create immersive and research-driven heritage experiences that help travellers understand India’s historical landscapes, architectural traditions and cultural legacy with depth, accuracy and wonder.",
             },
             {
               icon: Heart,
               title: "Our Tour Philosophy",
-              desc: "We believe every journey should honour place, scholarship and memory - with depth over checklist tourism.",
+              desc: "We believe history is best understood not through textbooks alone, but through landscapes, architecture, inscriptions, stories and lived experiences.",
             },
           ].map((card) => (
             <div key={card.title} className="site-card rounded-2xl border border-border bg-card p-7 hover-lift">
@@ -107,7 +112,7 @@ function About() {
           <span className="section-eyebrow">Meet Our Guides</span>
           <h2 className="mt-3 font-serif text-3xl text-primary md:text-4xl">Storytellers, not script-readers.</h2>
         </div>
-        <div className="site-card-grid grid gap-6 sm:grid-cols-2 md:grid-cols-4">
+        <div className="site-card-grid grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           {guides.map((guide) => (
             <div key={guide.name} className="site-card rounded-2xl border border-border bg-card p-6 text-center hover-lift">
               <div className="site-card-icon mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gold/15 text-primary">
@@ -115,8 +120,8 @@ function About() {
               </div>
               <div className="site-card-content">
                 <h3 className="mt-4 font-serif text-lg text-primary">{guide.name}</h3>
-                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">Heritage Guide</p>
-                <p className="mt-2 text-sm text-foreground/75">10+ years guiding heritage circuits with depth and care.</p>
+                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">{guide.role}</p>
+                <p className="mt-2 text-sm text-foreground/75">{guide.desc}</p>
               </div>
             </div>
           ))}

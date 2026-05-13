@@ -4,8 +4,14 @@ import shivneri from "@/assets/tour-shivneri.jpg";
 import parvati from "@/assets/tour-parvati.jpg";
 import kondane from "@/assets/tour-kondane.jpg";
 import gondeshwar from "@/assets/tour-gondeshwar.jpg";
+import heroFort from "@/assets/hero-fort.jpg";
+import heroStory from "@/assets/hero-story.jpg";
 import heroTemple from "@/assets/hero-temple.jpg";
 import ayodhyaVaranasiPrayagraj from "@/assets/tour-ayodhya-varanasi-prayagraj.jpg";
+import badamiCave from "@/assets/gallery/badami-cave.jpg";
+import gondeshwarDetail from "@/assets/gallery/gondeshwar-detail.jpg";
+import hampiPillars from "@/assets/gallery/hampi-pillars.jpg";
+import pattadakalTemple from "@/assets/gallery/pattadakal-temple.jpg";
 import {
   type GalleryImage,
   ayodhyaVaranasiPrayagrajGallery,
@@ -73,23 +79,7 @@ export const tours: Tour[] = [
       "Hidden lanes of old Pune",
       "Photo stops & cultural anecdotes",
     ],
-    itinerary: [
-      {
-        time: "Hour 1",
-        title: "Gateway Stories",
-        desc: "Meet at Delhi Darwaza. Introduction to Peshwa Pune.",
-      },
-      {
-        time: "Hour 2",
-        title: "Inside the Wada",
-        desc: "Walk the foundations, fountain courtyard and fire-scarred halls.",
-      },
-      {
-        time: "Hour 3",
-        title: "Old Pune Lanes",
-        desc: "Short walk into surrounding peths and traditional wadas.",
-      },
-    ],
+    itinerary: [],
     inclusions: ["Heritage guide", "Entry tickets", "Bottled water", "Story handout"],
     exclusions: ["Travel to meeting point", "Personal expenses", "Food & beverages"],
     carry: ["Comfortable walking shoes", "Cap & sunglasses", "Water bottle", "Curiosity"],
@@ -215,11 +205,7 @@ export const tours: Tour[] = [
       "Heritage architecture talk",
       "Easy climb of 103 steps",
     ],
-    itinerary: [
-      { time: "06:00", title: "Meet at base", desc: "Brief introduction & warm-up." },
-      { time: "06:30", title: "Climb", desc: "Easy ascent with story stops." },
-      { time: "07:30", title: "Temple complex", desc: "Visit shrines and museum." },
-    ],
+    itinerary: [],
     inclusions: ["Guide", "Story handout"],
     exclusions: ["Travel", "Refreshments"],
     carry: ["Walking shoes", "Water", "Light jacket"],
@@ -578,5 +564,86 @@ export const blogPosts = [
     category: "Education",
     excerpt: "How a well-designed heritage trip can change a student's relationship with history.",
     image: shivneri,
+  },
+  {
+    slug: "hampi-lotus-mahal",
+    title: "The lotus Mahal in Hampi - a fine example of Indo-Saracenic architecture",
+    date: "Oct 12, 2020",
+    category: "Wonders of India",
+    excerpt:
+      "A sourced note on Hampi's Lotus Mahal and the blend of arches, ornament, and courtly design that makes it so memorable.",
+    content:
+      "Set inside Hampi's Zenana Enclosure, the Lotus Mahal is remembered for its unusual plan, open pavilion feel, and the graceful meeting of Hindu and Islamic design vocabulary.\n\nThe original article pays close attention to its stucco work, recessed basement, windows, arches, and even the staircase that seems to have been added after the main design was conceived.\n\nTogether, those details make the monument more than a pretty ruin - it becomes a lesson in how Vijayanagara architecture absorbed and reshaped multiple traditions.",
+    image: hampiPillars,
+    sourceName: "School of Indian History",
+    sourceUrl: "https://schoolofindianhistory.com/index.php/2020/10/12/hampi-lotus-mahal/",
+  },
+  {
+    slug: "thousand-pillars-temple-gem-of-kaktiya-archietecture",
+    title: "Thousand pillars temple - Gem of Kaktiya Archietecture",
+    date: "Sep 17, 2020",
+    category: "Wonders of India",
+    excerpt:
+      "A sourced introduction to the Thousand Pillar Temple near Warangal and the overlooked brilliance of Kakatiya architecture.",
+    content:
+      "This article places the Thousand Pillar Temple in the larger story of the Kakatiya dynasty and their artistic world in present-day Telangana.\n\nIts focus is not only on the monument's beauty, but on the craft discipline behind it: richly worked pillars, sculptural detail, and a temple plan that shows how confidently regional courts shaped the history of Indian architecture.\n\nRead as a summary, it works as an invitation to look beyond the best-known monuments and pay attention to the dynasties whose architecture still rewards slow observation.",
+    image: pattadakalTemple,
+    sourceName: "School of Indian History",
+    sourceUrl:
+      "https://schoolofindianhistory.com/index.php/2020/09/17/thousand-pillars-temple-gem-of-kaktiya-archietecture/",
+  },
+  {
+    slug: "taj-mahal-a-brief-history-of-the-wonder-built-in-the-17th-century",
+    title: "Taj Mahal - A brief history of the wonder built in the 17th century",
+    date: "Sep 13, 2020",
+    category: "Wonders of India",
+    excerpt:
+      "A sourced history note on the Taj Mahal as a funerary monument shaped by memory, empire, and extraordinary craft.",
+    content:
+      "The original piece revisits the Taj Mahal through the story of Shah Jahan and Mumtaz Mahal, grounding the monument in grief, court life, and the Mughal riverfront world of Agra.\n\nRather than treating the Taj only as an icon, it emphasizes why the building continues to matter: proportion, setting, symmetry, and the way architecture can transform personal loss into imperial memory.\n\nIt is a useful reminder that even the most familiar monument becomes richer when we return to the history behind its marble surface.",
+    image: heroStory,
+    sourceName: "School of Indian History",
+    sourceUrl:
+      "https://schoolofindianhistory.com/index.php/2020/09/13/taj-mahal-a-brief-history-of-the-wonder-built-in-the-17th-century/",
+  },
+  {
+    slug: "the-mahayogisvara-at-elephanta-a-tale-in-the-stone",
+    title: "The Mahayogisvara at Elephanta - A tale in the stone",
+    date: "Sep 11, 2020",
+    category: "Wonders of India",
+    excerpt:
+      "A sourced reading of Shiva's yogic form at Elephanta and the sculptural power of the great cave.",
+    content:
+      "This article turns to the main cave at Elephanta and focuses on Mahayogisvara, Shiva in a meditative and deeply composed form.\n\nThe source describes the sculpture's location, posture, ornaments, and symbolic force, showing how one carved image can hold together devotion, mythology, and artistic balance.\n\nFor readers interested in sacred art, it offers a clear way into the larger visual program of Elephanta without losing sight of the quiet intensity of the figure itself.",
+    image: badamiCave,
+    sourceName: "School of Indian History",
+    sourceUrl:
+      "https://schoolofindianhistory.com/index.php/2020/09/11/the-mahayogisvara-at-elephanta-a-tale-in-the-stone/",
+  },
+  {
+    slug: "the-fort-where-mughals-were-fooled",
+    title: "The fort where Mughals were fooled!!",
+    date: "Sep 08, 2020",
+    category: "Wonders of India",
+    excerpt:
+      "A sourced retelling of Bahadurgad and the famous episode where Mughal confidence met sharper local strategy.",
+    content:
+      "Set around Bahadurgad on the Bhima, this historical note combines the fort's setting with the political drama of the Deccan in the seventeenth century.\n\nIts central thread is the remembered episode in which Shivaji outmaneuvered Bahadur Khan - a story valued not just for its suspense, but for what it says about planning, timing, and the psychology of warfare.\n\nAs a short read, it shows how even a lesser-known fort can hold a striking story of tactical intelligence.",
+    image: heroFort,
+    sourceName: "School of Indian History",
+    sourceUrl: "https://schoolofindianhistory.com/index.php/2020/09/08/the-fort-where-mughals-were-fooled/",
+  },
+  {
+    slug: "hero-stones-memories-of-a-worrier",
+    title: "Hero stones - Memories of a worrier",
+    date: "Sep 07, 2020",
+    category: "Wonders of India",
+    excerpt:
+      "A sourced introduction to hero stones as memorial markers that preserve sacrifice, memory, and local history in stone.",
+    content:
+      "This entry introduces hero stones as memorial slabs raised to remember acts of bravery and death in conflict, cattle raids, and local defence.\n\nThe article treats them as small but powerful historical documents, where iconography, inscriptions, and layered carving can preserve memory long after written records fade.\n\nIt also makes a preservation argument: these stones survive in everyday landscapes, and they deserve to be noticed as part of India's historical archive, not dismissed as minor fragments.",
+    image: gondeshwarDetail,
+    sourceName: "School of Indian History",
+    sourceUrl: "https://schoolofindianhistory.com/index.php/2020/09/07/hero-stones-memories-of-a-worrier/",
   },
 ];

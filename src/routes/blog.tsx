@@ -50,9 +50,13 @@ function Blog() {
             <div className="heritage-tile-body pr-6">
               <p className="heritage-tile-kicker">{b.category}</p>
               <h3 className="mt-3 font-serif text-[1.65rem] leading-[1.08] text-primary">{b.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{b.excerpt}</p>
+              <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-muted-foreground">
+                {b.excerpt}
+              </p>
               <div className="heritage-tile-footer mt-6">
-                <span className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">Paranjape Journal</span>
+                <span className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                  {b.sourceName ?? "Paranjape Journal"}
+                </span>
                 <span className="inline-flex items-center gap-2 text-sm font-medium text-primary">
                   Read More
                   <ArrowRight className="heritage-tile-linkicon" size={14} />

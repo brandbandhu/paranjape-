@@ -23,6 +23,8 @@ export type BlogPost = {
   excerpt: string;
   content?: string;
   image: string;
+  sourceName?: string;
+  sourceUrl?: string;
   source?: "database" | "static";
 };
 

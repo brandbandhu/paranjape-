@@ -68,6 +68,22 @@ function BlogDetail() {
               <p key={`${post.slug}-paragraph-${index}`}>{paragraph}</p>
             ))}
           </div>
+          {post.sourceUrl ? (
+            <div className="mt-8 rounded-[1.5rem] border border-border bg-[color-mix(in_oklab,var(--secondary)_50%,var(--background))] p-5">
+              <p className="text-xs uppercase tracking-[0.22em] text-gold">Original Source</p>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                This post is sourced from {post.sourceName ?? "the original site"} and can also be read on the source page.
+              </p>
+              <a
+                href={post.sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-primary hover:text-primary/80"
+              >
+                Read the full article on {post.sourceName ?? "the source site"} <ArrowRight size={16} />
+              </a>
+            </div>
+          ) : null}
         </article>
 
         <aside className="space-y-6">
