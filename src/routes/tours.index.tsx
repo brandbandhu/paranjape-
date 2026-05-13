@@ -36,11 +36,18 @@ function ToursList() {
 
   const list = useMemo(() => {
     if (type === "all") return tours;
+    
+    const activeCategory = categories.find(c => c.slug === type);
+    
     return tours.filter(tour => {
+      if (activeCategory) {
+        return tour.category === activeCategory.name;
+      }
+      
       const slugifiedCategory = tour.category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
       return slugifiedCategory === type;
     });
-  }, [tours, type]);
+  }, [tours, categories, type]);
 
   const activeFilter = dynamicTourFilters.find((filter) => filter.value === type) ?? dynamicTourFilters[0];
 
