@@ -3,18 +3,13 @@ import { useMemo } from "react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
 import { TourCard } from "@/components/site/TourCard";
-import { filterToursByListingType, tourListingFilters, type TourListingFilter } from "@/data/tourFilters";
 import { getPublicSiteContent } from "@/lib/content.functions";
 import heroFort from "@/assets/hero-fort.jpg";
-
-function isTourListingFilter(value: string): value is TourListingFilter {
-  return tourListingFilters.some((filter) => filter.value === value);
-}
 
 export const Route = createFileRoute("/tours/")({
   loader: () => getPublicSiteContent(),
   validateSearch: (search: Record<string, unknown>) => ({
-    type: typeof search.type === "string" && isTourListingFilter(search.type) ? search.type : "all",
+    type: typeof search.type === "string" ? search.type : "all",
   }),
   head: () => ({
     meta: [
@@ -28,10 +23,23 @@ export const Route = createFileRoute("/tours/")({
 });
 
 function ToursList() {
-  const { tours } = Route.useLoaderData();
+  const { tours, categories } = Route.useLoaderData();
   const { type } = Route.useSearch();
-  const list = useMemo(() => filterToursByListingType(tours, type), [tours, type]);
-  const activeFilter = tourListingFilters.find((filter) => filter.value === type) ?? tourListingFilters[0];
+  
+  const dynamicTourFilters = [
+    { value: "all", label: "All Tours" },
+    ...categories.map(c => ({ value: c.slug, label: c.name }))
+  ];
+
+  const list = useMemo(() => {
+    if (type === "all") return tours;
+    return tours.filter(tour => {
+      const slugifiedCategory = tour.category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      return slugifiedCategory === type;
+    });
+  }, [tours, type]);
+
+  const activeFilter = dynamicTourFilters.find((filter) => filter.value === type) ?? dynamicTourFilters[0];
 
   return (
     <Layout>
@@ -43,7 +51,7 @@ function ToursList() {
       />
       <section className="container-prose py-14">
         <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {tourListingFilters.map((filter) => (
+          {dynamicTourFilters.map((filter) => (
             <Link
               key={filter.value}
               to="/tours"

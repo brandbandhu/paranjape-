@@ -1,4 +1,4 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useMatches } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { tourListingFilters } from "@/data/tourFilters";
@@ -23,7 +23,15 @@ export function Header() {
   const [desktopToursOpen, setDesktopToursOpen] = useState(false);
   const [mobileToursOpen, setMobileToursOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  
   const currentLocation = useLocation({ select: (location) => location.href });
+  const matches = useMatches();
+  const matchWithCategories = matches.find((m) => m.loaderData && (m.loaderData as any).categories);
+  const categories = matchWithCategories ? ((matchWithCategories.loaderData as any).categories as any[]) : [];
+  
+  const dynamicTourDropdownLinks = categories.length > 0 
+    ? categories.map(c => ({ value: c.slug, label: c.name }))
+    : tourListingFilters.filter((filter) => filter.value !== "all");
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
     onScroll();
@@ -112,7 +120,7 @@ export function Header() {
               }`}
             >
               <div className="min-w-[220px] rounded-2xl border border-border bg-background/95 p-2 shadow-[var(--shadow-elegant)] backdrop-blur">
-                {tourDropdownLinks.map((filter) => (
+                {dynamicTourDropdownLinks.map((filter) => (
                   <Link
                     key={filter.value}
                     to="/tours"
@@ -198,7 +206,7 @@ export function Header() {
 
               {mobileToursOpen && (
                 <div className="ml-4 mt-2 flex flex-col gap-1 border-l border-border pl-4">
-                  {tourDropdownLinks.map((filter) => (
+                  {dynamicTourDropdownLinks.map((filter) => (
                     <Link
                       key={filter.value}
                       to="/tours"

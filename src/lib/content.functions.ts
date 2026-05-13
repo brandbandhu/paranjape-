@@ -1,5 +1,6 @@
 import type { ContactEnquiryInput } from "@/data/contactEnquiry";
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestUrl, setResponseHeader } from "@tanstack/react-start/server";
 import { loginWithCredentials, logoutCurrentAdmin, requireAdmin } from "@/lib/auth.server";
 import {
   deleteBlogPostById,
@@ -23,14 +24,20 @@ import {
 } from "@/lib/content.server";
 
 export const getPublicSiteContent = createServerFn({ method: "GET" }).handler(async () => {
+  getRequestUrl();
+  setResponseHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   return fetchPublicSiteContent();
 });
 
 export const getAdminDashboardContent = createServerFn({ method: "GET" }).handler(async () => {
+  getRequestUrl();
+  setResponseHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   return fetchAdminDashboardData();
 });
 
 export const getAdminSessionState = createServerFn({ method: "GET" }).handler(async () => {
+  getRequestUrl();
+  setResponseHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   const admin = await requireAdmin().catch(() => null);
   return { authenticated: Boolean(admin), admin };
 });
