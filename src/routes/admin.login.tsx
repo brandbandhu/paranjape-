@@ -62,14 +62,7 @@ function AdminLogin() {
               This dashboard writes to MySQL and updates the existing frontend without removing the
               current design or legacy tour pages.
             </p>
-            <div className="mt-8 rounded-[1.5rem] border border-gold/35 bg-gold/10 p-5 text-sm leading-6 text-foreground/80">
-              <p className="font-medium text-primary">Default setup</p>
-              <p className="mt-2">
-                Database defaults use `paranjpe_tours` on `127.0.0.1:3306` with `root` / `root`.
-                Admin login defaults to `admin` / `admin123` unless you override the values in
-                your environment.
-              </p>
-            </div>
+
           </div>
 
           <form
