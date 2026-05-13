@@ -8,6 +8,9 @@ import heroFort from "@/assets/hero-fort.jpg";
 
 export const Route = createFileRoute("/tours/")({
   loader: () => getPublicSiteContent(),
+  headers: () => ({
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+  }),
   validateSearch: (search: Record<string, unknown>) => ({
     type: typeof search.type === "string" ? search.type : "all",
   }),

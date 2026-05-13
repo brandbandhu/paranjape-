@@ -25,6 +25,9 @@ import gondeshwarComplex from "@/assets/gallery/gondeshwar-complex.jpg";
 
 export const Route = createFileRoute("/")({
   loader: () => getPublicSiteContent(),
+  headers: () => ({
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+  }),
   head: () => ({
     meta: [
       { title: "Paranjape Tours - Heritage Storytelling Travel" },

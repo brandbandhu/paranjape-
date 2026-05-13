@@ -267,6 +267,7 @@ export type SaveTourInput = {
   slug?: string;
   title: string;
   categoryId?: number;
+  categoryLabel?: string;
   location?: string;
   duration?: string;
   difficulty?: string;
@@ -529,7 +530,8 @@ export async function upsertTour(input: SaveTourInput) {
     throw new Error("Tour slug is required.");
   }
 
-  const categoryLabel = await getCategoryLabel(input.categoryId);
+  const dbCategoryLabel = await getCategoryLabel(input.categoryId);
+  const finalCategoryLabel = input.categoryId ? dbCategoryLabel : (input.categoryLabel?.trim() ?? "");
   const image = input.image?.trim() ?? "";
   const gallery = input.gallery?.filter((item) => item.src.trim()) ?? [];
 
@@ -537,7 +539,7 @@ export async function upsertTour(input: SaveTourInput) {
     slug,
     title,
     input.categoryId ?? null,
-    categoryLabel,
+    finalCategoryLabel,
     input.location?.trim() ?? "",
     input.duration?.trim() ?? "",
     input.difficulty?.trim() ?? "",

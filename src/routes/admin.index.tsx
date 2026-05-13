@@ -433,6 +433,7 @@ function draftToTourInput(draft: TourDraft): SaveTourInput {
     slug: draft.slug,
     title: draft.title,
     categoryId: draft.categoryId ? Number(draft.categoryId) : undefined,
+    categoryLabel: draft.categoryId ? undefined : (adminTourCategoryPresets.find(c => c.slug === draft.category)?.name ?? draft.category),
     location: draft.location,
     duration: draft.duration,
     difficulty: draft.difficulty,
