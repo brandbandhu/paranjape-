@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Layout } from "@/components/site/Layout";
 import { getPublicSiteContent } from "@/lib/content.functions";
+import { resolveBlogImage } from "@/lib/blog-images";
 import type { Testimonial } from "@/lib/content.types";
 import { WhatsAppIcon } from "@/components/site/WhatsAppIcon";
 import { TourCard } from "@/components/site/TourCard";
@@ -401,7 +402,12 @@ function Home() {
               className="site-card group overflow-hidden rounded-2xl border border-border bg-card hover-lift"
             >
               <div className="site-card-media image-zoom aspect-[4/3]">
-                <img src={post.image} alt={post.title} className="h-full w-full object-cover" loading="lazy" />
+                <img
+                  src={resolveBlogImage(post)}
+                  alt={post.title}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
               </div>
               <div className="site-card-content p-5">
                 <p className="text-xs uppercase tracking-[0.25em] text-gold">

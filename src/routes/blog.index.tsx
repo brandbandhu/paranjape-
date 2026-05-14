@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
 import { getPublicSiteContent } from "@/lib/content.functions";
+import { resolveBlogImage } from "@/lib/blog-images";
 import heroStory from "@/assets/hero-story.jpg";
 
 export const Route = createFileRoute("/blog/")({
@@ -47,7 +48,12 @@ function Blog() {
             style={cardDelayStyle(index)}
           >
             <Link to="/blog/$slug" params={{ slug: b.slug }} className="heritage-tile-media block">
-              <img src={b.image} alt={b.title} className="h-full w-full object-cover" loading="lazy" />
+              <img
+                src={resolveBlogImage(b)}
+                alt={b.title}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
             </Link>
             <div className="heritage-tile-body pr-6">
               <p className="heritage-tile-kicker">{b.category}</p>
