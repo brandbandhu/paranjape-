@@ -22,6 +22,9 @@ import type {
 type GalleryImage = { src: string; alt: string };
 type TourItinerary = { time: string; title: string; desc: string };
 type TourFaq = { q: string; a: string };
+export type LegacyContentType = "tour" | "blog" | "testimonial" | "shop";
+
+const legacyContentTypes: LegacyContentType[] = ["tour", "blog", "testimonial", "shop"];
 
 function slugify(value: string) {
   return value
@@ -192,6 +195,72 @@ function mapCategoryRow(row: any): ContentCategory {
   };
 }
 
+function normalizeLegacyKey(value: string) {
+  return slugify(value);
+}
+
+function getLegacyTourKey(tour: { slug: string }) {
+  return normalizeLegacyKey(tour.slug);
+}
+
+function getLegacyBlogKey(post: { slug: string }) {
+  return normalizeLegacyKey(post.slug);
+}
+
+function getLegacyShopKey(item: { slug: string }) {
+  return normalizeLegacyKey(item.slug);
+}
+
+function getLegacyTestimonialKey(item: { name: string; role: string; text: string }) {
+  return normalizeLegacyKey(`${item.name}-${item.role || item.text.slice(0, 48)}`);
+}
+
+function createHiddenLegacyMap() {
+  return {
+    tour: new Set<string>(),
+    blog: new Set<string>(),
+    testimonial: new Set<string>(),
+    shop: new Set<string>(),
+  };
+}
+
+function mapHiddenLegacyRows(rows: Array<{ content_type?: unknown; legacy_key?: unknown }>) {
+  const hidden = createHiddenLegacyMap();
+
+  for (const row of rows) {
+    const contentType = String(row.content_type || "") as LegacyContentType;
+    const legacyKey = normalizeLegacyKey(String(row.legacy_key || ""));
+
+    if (!legacyKey || !legacyContentTypes.includes(contentType)) {
+      continue;
+    }
+
+    hidden[contentType].add(legacyKey);
+  }
+
+  return hidden;
+}
+
+function hideLegacyContentInPool(
+  pool: Awaited<ReturnType<typeof getPool>>,
+  type: LegacyContentType,
+  legacyKey?: string,
+) {
+  const normalizedKey = normalizeLegacyKey(legacyKey?.trim() ?? "");
+  if (!normalizedKey) {
+    return Promise.resolve();
+  }
+
+  return pool.execute(
+    `
+      INSERT INTO legacy_content_visibility (content_type, legacy_key, hidden)
+      VALUES (?, ?, 1)
+      ON DUPLICATE KEY UPDATE hidden = VALUES(hidden)
+    `,
+    [type, normalizedKey],
+  );
+}
+
 export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
   try {
     const pool = await getPool();
@@ -213,6 +282,9 @@ export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
     const [categoryRows] = await pool.query<any[]>(
       "SELECT * FROM categories ORDER BY name ASC",
     );
+    const [legacyVisibilityRows] = await pool.query<any[]>(
+      "SELECT content_type, legacy_key FROM legacy_content_visibility WHERE hidden = 1",
+    );
 
     const databaseTours = tourRows.map(mapTourRow);
     const databaseBlogs = blogRows.map(mapBlogRow);
@@ -220,18 +292,39 @@ export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
     const databaseShopItems = shopRows.map(mapShopRow);
     const databaseCategories = categoryRows.map(mapCategoryRow);
     const staticCategories = buildStaticCategories();
+    const hiddenLegacyItems = mapHiddenLegacyRows(legacyVisibilityRows);
+    const visibleStaticTours = staticTours
+      .map((tour) => ({
+        ...tour,
+        legacyKey: getLegacyTourKey(tour),
+        source: "static" as const,
+      }))
+      .filter((tour) => !hiddenLegacyItems.tour.has(tour.legacyKey));
+    const visibleStaticBlogs = staticBlogPosts
+      .map((post) => ({
+        ...post,
+        legacyKey: getLegacyBlogKey(post),
+        source: "static" as const,
+      }))
+      .filter((post) => !hiddenLegacyItems.blog.has(post.legacyKey));
+    const visibleStaticTestimonials = staticTestimonials
+      .map((item) => ({
+        ...item,
+        legacyKey: getLegacyTestimonialKey(item),
+      }))
+      .filter((item) => !hiddenLegacyItems.testimonial.has(item.legacyKey));
+    const visibleStaticShopItems = staticShopItems
+      .map((item) => ({
+        ...item,
+        legacyKey: getLegacyShopKey(item),
+      }))
+      .filter((item) => !hiddenLegacyItems.shop.has(item.legacyKey));
 
     return {
-      tours: mergeBySlug(
-        databaseTours,
-        staticTours.map((tour) => ({ ...tour, source: "static" as const })),
-      ),
-      blogPosts: mergeBySlug(
-        databaseBlogs,
-        staticBlogPosts.map((post) => ({ ...post, source: "static" as const })),
-      ),
-      testimonials: [...databaseTestimonials, ...staticTestimonials],
-      shopItems: mergeBySlug(databaseShopItems, staticShopItems),
+      tours: mergeBySlug(databaseTours, visibleStaticTours),
+      blogPosts: mergeBySlug(databaseBlogs, visibleStaticBlogs),
+      testimonials: [...databaseTestimonials, ...visibleStaticTestimonials],
+      shopItems: mergeBySlug(databaseShopItems, visibleStaticShopItems),
       categories: mergeBySlug(databaseCategories, staticCategories),
       databaseAvailable: true,
     };
@@ -239,10 +332,24 @@ export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
     console.error("Unable to load MySQL content, falling back to static content.", error);
 
     return {
-      tours: staticTours.map((tour) => ({ ...tour, source: "static" as const })),
-      blogPosts: staticBlogPosts.map((post) => ({ ...post, source: "static" as const })),
-      testimonials: staticTestimonials,
-      shopItems: staticShopItems,
+      tours: staticTours.map((tour) => ({
+        ...tour,
+        legacyKey: getLegacyTourKey(tour),
+        source: "static" as const,
+      })),
+      blogPosts: staticBlogPosts.map((post) => ({
+        ...post,
+        legacyKey: getLegacyBlogKey(post),
+        source: "static" as const,
+      })),
+      testimonials: staticTestimonials.map((item) => ({
+        ...item,
+        legacyKey: getLegacyTestimonialKey(item),
+      })),
+      shopItems: staticShopItems.map((item) => ({
+        ...item,
+        legacyKey: getLegacyShopKey(item),
+      })),
       categories: buildStaticCategories(),
       databaseAvailable: false,
     };
@@ -264,6 +371,7 @@ export type SaveCategoryInput = {
 
 export type SaveTourInput = {
   id?: number;
+  legacyKey?: string;
   slug?: string;
   title: string;
   categoryId?: number;
@@ -292,6 +400,7 @@ export type SaveTourInput = {
 
 export type SaveTestimonialInput = {
   id?: number;
+  legacyKey?: string;
   name: string;
   role: string;
   text: string;
@@ -299,6 +408,7 @@ export type SaveTestimonialInput = {
 
 export type SaveShopItemInput = {
   id?: number;
+  legacyKey?: string;
   slug?: string;
   title: string;
   category: string;
@@ -310,6 +420,7 @@ export type SaveShopItemInput = {
 
 export type SaveBlogPostInput = {
   id?: number;
+  legacyKey?: string;
   slug?: string;
   title: string;
   category: string;
@@ -628,6 +739,8 @@ export async function upsertTour(input: SaveTourInput) {
       values,
     );
   }
+
+  await hideLegacyContentInPool(pool, "tour", input.legacyKey);
 }
 
 export async function deleteTourById(id: number) {
@@ -658,6 +771,8 @@ export async function upsertTestimonial(input: SaveTestimonialInput) {
       [name, role, text],
     );
   }
+
+  await hideLegacyContentInPool(pool, "testimonial", input.legacyKey);
 }
 
 export async function deleteTestimonialById(id: number) {
@@ -711,6 +826,8 @@ export async function upsertShopItem(input: SaveShopItemInput) {
       values,
     );
   }
+
+  await hideLegacyContentInPool(pool, "shop", input.legacyKey);
 }
 
 export async function deleteShopItemById(id: number) {
@@ -755,12 +872,25 @@ export async function upsertBlogPost(input: SaveBlogPostInput) {
       values,
     );
   }
+
+  await hideLegacyContentInPool(pool, "blog", input.legacyKey);
 }
 
 export async function deleteBlogPostById(id: number) {
   await requireAdmin();
   const pool = await getPool();
   await pool.execute("DELETE FROM blogs WHERE id = ?", [id]);
+}
+
+export async function hideLegacyContent(input: { type: LegacyContentType; legacyKey: string }) {
+  await requireAdmin();
+
+  if (!legacyContentTypes.includes(input.type)) {
+    throw new Error("Unsupported legacy content type.");
+  }
+
+  const pool = await getPool();
+  await hideLegacyContentInPool(pool, input.type, input.legacyKey);
 }
 
 async function createContactEnquiryRecord(normalized: NormalizedContactEnquiryInput) {

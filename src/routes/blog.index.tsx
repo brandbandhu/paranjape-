@@ -6,12 +6,15 @@ import { PageBanner } from "@/components/site/PageBanner";
 import { getPublicSiteContent } from "@/lib/content.functions";
 import heroStory from "@/assets/hero-story.jpg";
 
-export const Route = createFileRoute("/blog")({
+export const Route = createFileRoute("/blog/")({
   loader: () => getPublicSiteContent(),
   head: () => ({
     meta: [
       { title: "Blog - Paranjape Tours Journal" },
-      { name: "description", content: "Long-form notes on forts, temples, lanes and the people who keep them alive." },
+      {
+        name: "description",
+        content: "Long-form notes on forts, temples, lanes and the people who keep them alive.",
+      },
       { property: "og:title", content: "Paranjape Tours Blog" },
       { property: "og:description", content: "Heritage essays and travel notes." },
     ],
@@ -19,9 +22,10 @@ export const Route = createFileRoute("/blog")({
   component: Blog,
 });
 
-const cardDelayStyle = (index: number): CSSProperties => ({
-  "--card-delay": `${index * 90}ms`,
-}) as CSSProperties;
+const cardDelayStyle = (index: number): CSSProperties =>
+  ({
+    "--card-delay": `${index * 90}ms`,
+  }) as CSSProperties;
 
 function Blog() {
   const { blogPosts } = Route.useLoaderData();
@@ -37,19 +41,21 @@ function Blog() {
 
       <section className="container-prose site-card-grid py-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {blogPosts.map((b, index) => (
-          <Link
+          <article
             key={b.slug}
-            to="/blog/$slug"
-            params={{ slug: b.slug }}
             className="heritage-tile group h-full"
             style={cardDelayStyle(index)}
           >
-            <div className="heritage-tile-media">
+            <Link to="/blog/$slug" params={{ slug: b.slug }} className="heritage-tile-media block">
               <img src={b.image} alt={b.title} className="h-full w-full object-cover" loading="lazy" />
-            </div>
+            </Link>
             <div className="heritage-tile-body pr-6">
               <p className="heritage-tile-kicker">{b.category}</p>
-              <h3 className="mt-3 font-serif text-[1.65rem] leading-[1.08] text-primary">{b.title}</h3>
+              <h3 className="mt-3 font-serif text-[1.65rem] leading-[1.08] text-primary">
+                <Link to="/blog/$slug" params={{ slug: b.slug }} className="hover:text-primary/80">
+                  {b.title}
+                </Link>
+              </h3>
               <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-muted-foreground">
                 {b.excerpt}
               </p>
@@ -57,13 +63,17 @@ function Blog() {
                 <span className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
                   {b.sourceName ?? "Paranjape Journal"}
                 </span>
-                <span className="inline-flex items-center gap-2 text-sm font-medium text-primary">
+                <Link
+                  to="/blog/$slug"
+                  params={{ slug: b.slug }}
+                  className="inline-flex items-center gap-2 text-sm font-medium text-primary"
+                >
                   Read More
                   <ArrowRight className="heritage-tile-linkicon" size={14} />
-                </span>
+                </Link>
               </div>
             </div>
-          </Link>
+          </article>
         ))}
       </section>
     </Layout>

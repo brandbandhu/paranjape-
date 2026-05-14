@@ -5,11 +5,13 @@ import { loginWithCredentials, logoutCurrentAdmin, requireAdmin } from "@/lib/au
 import {
   deleteBlogPostById,
   deleteCategoryById,
+  hideLegacyContent,
   deleteShopItemById,
   deleteTestimonialById,
   deleteTourById,
   fetchAdminDashboardData,
   fetchPublicSiteContent,
+  type LegacyContentType,
   type SaveBlogPostInput,
   type SaveCategoryInput,
   type SaveShopItemInput,
@@ -120,6 +122,13 @@ export const deleteBlogPost = createServerFn({ method: "POST" })
   .inputValidator((data: { id: number }) => data)
   .handler(async ({ data }) => {
     await deleteBlogPostById(data.id);
+    return { success: true };
+  });
+
+export const deleteLegacyContent = createServerFn({ method: "POST" })
+  .inputValidator((data: { type: LegacyContentType; legacyKey: string }) => data)
+  .handler(async ({ data }) => {
+    await hideLegacyContent(data);
     return { success: true };
   });
 
