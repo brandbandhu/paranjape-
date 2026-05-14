@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
 import { TourCard } from "@/components/site/TourCard";
+import { filterToursByListingType, tourListingFilters } from "@/data/tourFilters";
 import { getPublicSiteContent } from "@/lib/content.functions";
 import heroFort from "@/assets/hero-fort.jpg";
 
@@ -26,30 +27,14 @@ export const Route = createFileRoute("/tours/")({
 });
 
 function ToursList() {
-  const { tours, categories } = Route.useLoaderData();
+  const { tours } = Route.useLoaderData();
   const { type } = Route.useSearch();
-  
-  const dynamicTourFilters = [
-    { value: "all", label: "All Tours" },
-    ...categories.map(c => ({ value: c.slug, label: c.name }))
-  ];
 
   const list = useMemo(() => {
-    if (type === "all") return tours;
-    
-    const activeCategory = categories.find(c => c.slug === type);
-    
-    return tours.filter(tour => {
-      if (activeCategory) {
-        return tour.category === activeCategory.name;
-      }
-      
-      const slugifiedCategory = tour.category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-      return slugifiedCategory === type;
-    });
-  }, [tours, categories, type]);
+    return filterToursByListingType(tours, type);
+  }, [tours, type]);
 
-  const activeFilter = dynamicTourFilters.find((filter) => filter.value === type) ?? dynamicTourFilters[0];
+  const activeFilter = tourListingFilters.find((filter) => filter.value === type) ?? tourListingFilters[0];
 
   return (
     <Layout>
@@ -61,7 +46,7 @@ function ToursList() {
       />
       <section className="container-prose py-14">
         <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {dynamicTourFilters.map((filter) => (
+          {tourListingFilters.map((filter) => (
             <Link
               key={filter.value}
               to="/tours"

@@ -8,7 +8,7 @@ const DEFAULT_DB_PORT = Number(process.env.MYSQL_PORT ?? "3306");
 const DEFAULT_DB_USER = process.env.MYSQL_USER ?? "root";
 const DEFAULT_DB_PASSWORD = process.env.MYSQL_PASSWORD ?? "root";
 const DEFAULT_DB_NAME = process.env.MYSQL_DATABASE ?? "paranjpe_tours";
-const DB_SCHEMA_VERSION = "paranjpe-cms-v3";
+const DB_SCHEMA_VERSION = "paranjpe-cms-v4";
 
 const SCRYPT_KEY_LENGTH = 64;
 
@@ -176,6 +176,19 @@ async function createTables(pool: Pool) {
       published_on DATE NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS legacy_content_visibility (
+      id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      content_type VARCHAR(40) NOT NULL,
+      legacy_key VARCHAR(255) NOT NULL,
+      hidden TINYINT(1) NOT NULL DEFAULT 1,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY uq_legacy_content_visibility (content_type, legacy_key),
+      INDEX idx_legacy_content_visibility_hidden (hidden)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
 
