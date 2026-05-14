@@ -1,3 +1,4 @@
+import { blogImagePaths } from "@/data/blogImagePaths";
 export const blogPosts = [
   {
     slug: "hampi-lotus-mahal",
@@ -13,7 +14,7 @@ export const blogPosts = [
       "The upper room is provided with numerous little windows on all sides, each window originally having little wooden shutters, a feature which we do not find in any other building here, and one which tends to strengthen the conjecture that these buildings do really represent those of the Zenana. While the pillars and, arches are Muhammadan in character, the base, roof, cornice and stucco ornament are Hindu in design.",
       "It is an interesting and not unpleasant blending of these two different styles and a fine example of Indo-Saracenic architecture. In the south-west corner of the enclosure is a little pavilion situated in the middle of a small tank or swimming bath. On the east side, close to the main entrance, is a building which in all probability was used as a guard-room, or quarters for the female guards mentioned by the Portuguese travellers. Just outside the enclosure, on the south side, is the small temple of Ranga containing a large stone image of Hanuman some nine feet high.",
     ].join("\n\n"),
-    image: "https://schoolofindianhistory.com/wp-content/uploads/2020/10/20011483279_dbccea45bb_k.jpg",
+    image: blogImagePaths["hampi-lotus-mahal"],
     sourceName: "School of Indian History",
     sourceUrl: "https://schoolofindianhistory.com/index.php/2020/10/12/hampi-lotus-mahal/",
   },
@@ -34,7 +35,7 @@ export const blogPosts = [
       "The mandapa on the south contains about three hundred pillars. The name Veyistambhala-Gudi indicates that the original structure had one thousand pillars but currently the temple has lost some of its parts in the main Trikuta -structure and in the mandapa. The pillars in the mukha mandapa , the doorways Panavatta of the Shiva Linga and the Nandi exhibit exquisite decoration and the highest degree of polishing.",
       "\"This temple is constructed by using a unique technique called sandbox technique for strengthening the foundation. In this technique, a deep pit is dug and filled with sand and covered with huge rock beams. On this rock platform, the huge columns were raised and then the main structuring was made. This invention of the technique of Kakatiya sculptors is immortal. The skill of Kakatiya sculptors is also evident in the skilful craftsmanship and flawless ivory carving technique in their art.\"",
     ].join("\n\n"),
-    image: "https://schoolofindianhistory.com/wp-content/uploads/2020/09/deendayal1880s2.jpg",
+    image: blogImagePaths["thousand-pillars-temple-gem-of-kaktiya-archietecture"],
     sourceName: "School of Indian History",
     sourceUrl:
       "https://schoolofindianhistory.com/index.php/2020/09/17/thousand-pillars-temple-gem-of-kaktiya-archietecture/",
@@ -54,7 +55,7 @@ export const blogPosts = [
       "The question as to who designed the Taj is disputed, but there is epigraphical evidence to show that is was Usta Ahmad of Lahore. The mausoleum was constructed under the superintendence of Makramat Khan and Mir Abdu-l-Karim, the dome being built by Ismail Khan of Turkey and the inscriptions executed by `Abdu-I-Haq, better known as Amanat Khan of Shiraz, who was the brother of Shah Jahan's minister, Afzal Khan, and was the best calligraphist of his age.",
       "The construction of the tomb was begun in 1631 AD and completed in 1648 AD with the mosque on the west, the Jawab or Mehman khana on the east and the main gateway on the south, the outer court and its cloisters being added subsequently and completed in 1653. The white marble so plentifully used, came from Makrana and Raiwala in Jaipur State, the red sandstone from Fatehpur Sikri and the neighbourhood of Agra, and the jewels and precious stones from Persia and elsewhere.",
     ].join("\n\n"),
-    image: "https://schoolofindianhistory.com/wp-content/uploads/2020/09/best-quotes-about-Taj-Mahal.jpg",
+    image: blogImagePaths["taj-mahal-a-brief-history-of-the-wonder-built-in-the-17th-century"],
     sourceName: "School of Indian History",
     sourceUrl:
       "https://schoolofindianhistory.com/index.php/2020/09/13/taj-mahal-a-brief-history-of-the-wonder-built-in-the-17th-century/",
@@ -75,7 +76,7 @@ export const blogPosts = [
       "In Hindu mythology, there is an interesting episode in Shiva's life which led the artists to imitate A model of a kindred religion. Daksha, Shiva's father-in-law, quite ignored the latter and 'even his own daughter Sati, gives the first Wife, for the simple 'reason that they led poor ascetics' lives.",
       "The relations were so 'far stretched that they were not invited to sacrifice. Sati took this to heart and in a fit of Anger burned herself. Upon this Shiva turned A great ascetic Mahayogi hereafter called the Mahayogisvara. The gods were 'extremely anxious. They were afraid everything might come to a standstill, Shiva being 'the sustainer of the world. 'They decided to wait upon him mid to seize a 'favourable opportunity of requesting him to look to 'the welfare of mankind. The panel is the representation of this legend.",
     ].join("\n\n"),
-    image: "https://schoolofindianhistory.com/wp-content/uploads/2020/09/5_5.jpg",
+    image: blogImagePaths["the-mahayogisvara-at-elephanta-a-tale-in-the-stone"],
     sourceName: "School of Indian History",
     sourceUrl:
       "https://schoolofindianhistory.com/index.php/2020/09/11/the-mahayogisvara-at-elephanta-a-tale-in-the-stone/",
@@ -94,7 +95,7 @@ export const blogPosts = [
       "In 1689, Sambhaji Raja and poet Kalash were captured alive at Sangameshwar in Konkan by Mughal Sardar Mukarrabkhan. After that, Sambhaji Raje and his advisor poet Kalash were brought to Bahadurgarh before Aurangzeb. On this fort, Aurangzeb inflicted innumerable hardships on Sambhaji kings and poet Kalash. After the fort of Ahmednagar was conquered by Nanasaheb Peshwa in 1759, Bahadurgarh was conquered by Sadashivrao, the Peshwa's brother. Later this fort remained in the possession of Marathas till 1818.",
       "Entering from Pedgaon village, one can see the grand arch of the door. Numerous remains are scattered inside the fort to this day. Today, it is not possible to see many ruins in the fort. Bahadurgarh is famous for its Yadava period temples. Of these, the Laxminarayan temple on the river bank is still in good condition. Remains of Pataleshwar, Mallikarjun temple can be seen near here. Remains of a fort built by Bahadur Khan can also be seen on the banks of the river. Although these ruins have fallen, it shows the grandeur of the fort. The fort appears to have been heavily constructed to supply water. The water of the river Bhima can be found circulating in the entire fort with the help of pully. It takes around2-3 hours to see the entire fort.",
     ].join("\n\n"),
-    image: "https://schoolofindianhistory.com/wp-content/uploads/2020/09/1-IMG_8752-001.jpg",
+    image: blogImagePaths["the-fort-where-mughals-were-fooled"],
     sourceName: "School of Indian History",
     sourceUrl: "https://schoolofindianhistory.com/index.php/2020/09/08/the-fort-where-mughals-were-fooled/",
   },
@@ -112,7 +113,7 @@ export const blogPosts = [
       "In the lowest part, the battlefield is engraved where the hero fell. There may be a battle fought with just swords or the battle of the cavalry. If this hero died while defending the cows, it may also show a group of cows. In the middle part, the Apsaras are often seen taking the fallen hero to heaven. Most of the time in this part, the hero is shown asleep. At the top, you can see the image of the deity worshipped by the Veera. We can various deities being depicted on different hero stones. But since most of the time Lord Shiva is shown, it seems that almost everyone in Maharashtra at that time worshipped Lord Shiva. Sometimes the figures of the moon and the sun are also carved on this sculpture at the top. This means that this hero should be remembered forever. For this the term 'Yavachandra Divakarau' is used which means as long as there are moon and sun in the sky, the fame of this worrier will remain!",
       "Apart from this, inscriptions are also found on some hero stones but there are very few such hero stones in Maharashtra. The topic of the hero stones will be discussed in detail in the following articles. Hero stones are the valuable resources of our history. Efforts should be made to preserve these. Convincing the people of the village where these hero stones are found is the important thing.",
     ].join("\n\n"),
-    image: "https://schoolofindianhistory.com/wp-content/uploads/2020/09/Hero-Stone.jpeg",
+    image: blogImagePaths["hero-stones-memories-of-a-worrier"],
     sourceName: "School of Indian History",
     sourceUrl: "https://schoolofindianhistory.com/index.php/2020/09/07/hero-stones-memories-of-a-worrier/",
   },
