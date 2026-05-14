@@ -2,10 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Award, Compass, Heart, Sparkles, UserRound, Users } from "lucide-react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
+import { getPublicSiteContent } from "@/lib/content.functions";
 import heroStory from "@/assets/hero-story.jpg";
 import founderPortrait from "@/assets/gallery/WhatsApp Image 2026-05-11 at 11.10.11 PM.jpeg";
 
 export const Route = createFileRoute("/about")({
+  loader: () => getPublicSiteContent(),
   head: () => ({
     meta: [
       { title: "About Us - Paranjape Tours" },
@@ -24,16 +26,9 @@ const stats = [
   { v: "4.5", l: "Experience Rating" },
 ];
 
-const guides = [
-  { name: "Archana Kulkarni", role: "MA Indology, Diploma in Tourism", desc: "A travel enthusiast with a passion for history. Excellent team leader" },
-  { name: "Aditya Naniwadekar", role: "Botanist", desc: "Core wildlife expert and 15+ years of experience in Travel Industry" },
-  { name: "Amogh Vaidya", role: "MA Indology, MA Sanskrit, pursuing PHD", desc: "8+ years of experience in the heritage segment" },
-  { name: "Gayatri Bhalerao", role: "MA Indology", desc: "3+ years of experience in the heritage segment" },
-  { name: "Bakul Joshi", role: "MA Indology", desc: "5+ years of experience in the heritage segment" },
-  { name: "Mukta Gogate", role: "CA", desc: "Finance expert by profession but handles back office effectively" }
-];
-
 function About() {
+  const { teamMembers } = Route.useLoaderData();
+
   return (
     <Layout>
       <PageBanner
@@ -113,15 +108,15 @@ function About() {
           <h2 className="mt-3 font-serif text-3xl text-primary md:text-4xl">Storytellers, not script-readers.</h2>
         </div>
         <div className="site-card-grid grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {guides.map((guide) => (
-            <div key={guide.name} className="site-card rounded-2xl border border-border bg-card p-6 text-center hover-lift">
+          {teamMembers.map((guide) => (
+            <div key={guide.slug} className="site-card rounded-2xl border border-border bg-card p-6 text-center hover-lift">
               <div className="site-card-icon mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gold/15 text-primary">
                 <UserRound size={30} />
               </div>
               <div className="site-card-content">
                 <h3 className="mt-4 font-serif text-lg text-primary">{guide.name}</h3>
                 <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">{guide.role}</p>
-                <p className="mt-2 text-sm text-foreground/75">{guide.desc}</p>
+                <p className="mt-2 text-sm text-foreground/75">{guide.description}</p>
               </div>
             </div>
           ))}

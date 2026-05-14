@@ -6,6 +6,7 @@ import {
   deleteBlogPostById,
   deleteCategoryById,
   deleteShopItemById,
+  deleteTeamMemberById,
   deleteTestimonialById,
   deleteTourById,
   fetchAdminDashboardData,
@@ -13,12 +14,14 @@ import {
   type SaveBlogPostInput,
   type SaveCategoryInput,
   type SaveShopItemInput,
+  type SaveTeamMemberInput,
   type SaveTestimonialInput,
   type SaveTourInput,
   submitPublicContactEnquiry,
   upsertBlogPost,
   upsertCategory,
   upsertShopItem,
+  upsertTeamMember,
   upsertTestimonial,
   upsertTour,
 } from "@/lib/content.server";
@@ -92,6 +95,20 @@ export const deleteTestimonial = createServerFn({ method: "POST" })
   .inputValidator((data: { id: number }) => data)
   .handler(async ({ data }) => {
     await deleteTestimonialById(data.id);
+    return { success: true };
+  });
+
+export const saveTeamMember = createServerFn({ method: "POST" })
+  .inputValidator((data: SaveTeamMemberInput) => data)
+  .handler(async ({ data }) => {
+    await upsertTeamMember(data);
+    return { success: true };
+  });
+
+export const deleteTeamMember = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: number }) => data)
+  .handler(async ({ data }) => {
+    await deleteTeamMemberById(data.id);
     return { success: true };
   });
 

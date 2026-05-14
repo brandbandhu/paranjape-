@@ -13,6 +13,7 @@ import {
   ShoppingBag,
   Trash2,
   Map,
+  Users,
 } from "lucide-react";
 import {
   adminTourCategoryPresetSlugs,
@@ -22,6 +23,7 @@ import {
   deleteBlogPost,
   deleteCategory,
   deleteShopItem,
+  deleteTeamMember,
   deleteTestimonial,
   deleteTour,
   getAdminDashboardContent,
@@ -29,6 +31,7 @@ import {
   saveBlogPost,
   saveCategory,
   saveShopItem,
+  saveTeamMember,
   saveTestimonial,
   saveTour,
 } from "@/lib/content.functions";
@@ -36,6 +39,7 @@ import type {
   SaveBlogPostInput,
   SaveCategoryInput,
   SaveShopItemInput,
+  SaveTeamMemberInput,
   SaveTestimonialInput,
   SaveTourInput,
 } from "@/lib/content.server";
@@ -44,6 +48,7 @@ import type {
   ContentCategory,
   ManagedTour,
   ShopItem,
+  TeamMember,
   Testimonial,
 } from "@/lib/content.types";
 
@@ -62,7 +67,7 @@ type Feedback =
     }
   | null;
 
-type AdminSectionId = "categories" | "tours" | "testimonials" | "shop" | "blogs";
+type AdminSectionId = "categories" | "tours" | "testimonials" | "team" | "shop" | "blogs";
 type ImageInputMode = "upload" | "url";
 
 type CategoryDraft = {
@@ -83,6 +88,14 @@ type TestimonialDraft = {
   name: string;
   role: string;
   text: string;
+};
+
+type TeamMemberDraft = {
+  id?: number;
+  slug: string;
+  name: string;
+  role: string;
+  description: string;
 };
 
 type ShopItemDraft = {
@@ -312,6 +325,16 @@ function testimonialToDraft(testimonial?: Testimonial): TestimonialDraft {
   };
 }
 
+function teamMemberToDraft(member?: TeamMember): TeamMemberDraft {
+  return {
+    id: member?.id,
+    slug: member?.slug ?? "",
+    name: member?.name ?? "",
+    role: member?.role ?? "",
+    description: member?.description ?? "",
+  };
+}
+
 function shopItemToDraft(item?: ShopItem): ShopItemDraft {
   return {
     id: item?.id,
@@ -458,7 +481,7 @@ function draftToTourInput(draft: TourDraft): SaveTourInput {
 }
 
 function AdminDashboard() {
-  const { admin, tours, blogPosts, testimonials, shopItems, categories, databaseAvailable } =
+  const { admin, tours, blogPosts, testimonials, teamMembers, shopItems, categories, databaseAvailable } =
     Route.useLoaderData();
   const router = useRouter();
   const navigate = useNavigate();
@@ -469,6 +492,8 @@ function AdminDashboard() {
   const legacyBlogs = blogPosts.filter((post) => post.source !== "database");
   const editableTestimonials = testimonials.filter((item) => item.source === "database");
   const legacyTestimonials = testimonials.filter((item) => item.source !== "database");
+  const editableTeamMembers = teamMembers.filter((item) => item.source === "database");
+  const legacyTeamMembers = teamMembers.filter((item) => item.source !== "database");
   const editableShopItems = shopItems.filter((item) => item.source === "database");
   const legacyShopItems = shopItems.filter((item) => item.source !== "database");
   const adminCategories = categories.filter((category) => category.id > 0);
@@ -511,6 +536,9 @@ function AdminDashboard() {
   const [testimonialDraft, setTestimonialDraft] = useState<TestimonialDraft>(() =>
     testimonialToDraft(),
   );
+  const [teamMemberDraft, setTeamMemberDraft] = useState<TeamMemberDraft>(() =>
+    teamMemberToDraft(),
+  );
   const [shopDraft, setShopDraft] = useState<ShopItemDraft>(() => shopItemToDraft());
   const [blogDraft, setBlogDraft] = useState<BlogDraft>(() => blogToDraft());
 
@@ -541,6 +569,13 @@ function AdminDashboard() {
       icon: MessageSquareQuote,
       count: `${editableTestimonials.length}`,
       note: `${legacyTestimonials.length} legacy quotes`,
+    },
+    {
+      id: "team",
+      label: "Team",
+      icon: Users,
+      count: `${editableTeamMembers.length}`,
+      note: `${legacyTeamMembers.length} legacy guides`,
     },
     {
       id: "shop",
@@ -715,8 +750,8 @@ function AdminDashboard() {
               </h1>
               <p className="mt-3 text-sm text-white/50 md:text-base">
                 Tours: {editableTours.length} | Categories: {adminCategories.length} |
-                Testimonials: {editableTestimonials.length} | Shop: {editableShopItems.length} |
-                Blogs: {editableBlogs.length}
+                Testimonials: {editableTestimonials.length} | Team: {editableTeamMembers.length} |
+                Shop: {editableShopItems.length} | Blogs: {editableBlogs.length}
               </p>
             </div>
 
@@ -1475,6 +1510,110 @@ function AdminDashboard() {
                 <SubmitButton
                   busy={busyKey === "save-testimonial"}
                   label={testimonialDraft.id ? "Update testimonial" : "Create testimonial"}
+                />
+              </form>
+            </div>
+              </SectionCard>
+            )}
+
+            {activeSection === "team" && (
+              <SectionCard
+                id="team"
+                title="Team Members"
+                subtitle="Manage the guide cards shown on the About page. Legacy frontend team members stay visible until you override them with the same slug."
+              >
+            <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
+              <div className="grid gap-4 md:grid-cols-2">
+                {teamMembers.map((member) => (
+                  <RecordCard
+                    key={`${member.source}-${member.slug}`}
+                    title={member.name}
+                    meta={member.role ? `${member.role} - ${member.slug}` : member.slug}
+                    source={member.source}
+                    description={member.description}
+                    actions={
+                      member.id ? (
+                        <div className="flex gap-2">
+                          <SmallButton
+                            label="Edit"
+                            icon={PencilLine}
+                            onClick={() => setTeamMemberDraft(teamMemberToDraft(member))}
+                          />
+                          <DangerButton
+                            label="Delete"
+                            icon={Trash2}
+                            onClick={() => {
+                              if (!window.confirm(`Delete the team member "${member.name}"?`)) {
+                                return;
+                              }
+
+                              void runTask("delete-team-member", "Team member deleted.", async () => {
+                                await deleteTeamMember({ data: { id: member.id! } });
+                                setTeamMemberDraft(teamMemberToDraft());
+                              });
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <LegacyNote text="Legacy about page team member. Use the same slug to override it from the admin panel." />
+                      )
+                    }
+                  />
+                ))}
+              </div>
+
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void runTask("save-team-member", "Team member saved.", async () => {
+                    const payload: SaveTeamMemberInput = { ...teamMemberDraft };
+                    await saveTeamMember({ data: payload });
+                    setTeamMemberDraft(teamMemberToDraft());
+                  });
+                }}
+                className={darkPanelClass}
+              >
+                <FormHeader
+                  title={teamMemberDraft.id ? "Edit team member" : "Add team member"}
+                  description="These entries power the team section on the About page."
+                  onReset={() => setTeamMemberDraft(teamMemberToDraft())}
+                />
+                <div className="mt-6 grid gap-4">
+                  <Field
+                    label="Name"
+                    value={teamMemberDraft.name}
+                    onChange={(value) =>
+                      setTeamMemberDraft((prev) => ({ ...prev, name: value }))
+                    }
+                    required
+                  />
+                  <Field
+                    label="Slug"
+                    value={teamMemberDraft.slug}
+                    onChange={(value) =>
+                      setTeamMemberDraft((prev) => ({ ...prev, slug: value }))
+                    }
+                    placeholder="optional-auto-generated"
+                  />
+                  <Field
+                    label="Role"
+                    value={teamMemberDraft.role}
+                    onChange={(value) =>
+                      setTeamMemberDraft((prev) => ({ ...prev, role: value }))
+                    }
+                  />
+                  <TextAreaField
+                    label="Description"
+                    value={teamMemberDraft.description}
+                    onChange={(value) =>
+                      setTeamMemberDraft((prev) => ({ ...prev, description: value }))
+                    }
+                    rows={6}
+                  />
+                </div>
+                <SubmitButton
+                  busy={busyKey === "save-team-member"}
+                  label={teamMemberDraft.id ? "Update team member" : "Create team member"}
                 />
               </form>
             </div>

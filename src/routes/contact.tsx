@@ -6,9 +6,11 @@ import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
 import { WhatsAppIcon } from "@/components/site/WhatsAppIcon";
 import { siteContact } from "@/data/siteContact";
-import { submitContactEnquiry } from "@/lib/content.functions";
+import type { ManagedTour } from "@/lib/content.types";
+import { getPublicSiteContent, submitContactEnquiry } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/contact")({
+  loader: () => getPublicSiteContent(),
   head: () => ({
     meta: [
       { title: "Contact - Paranjape Tours" },
@@ -39,15 +41,7 @@ type ContactCard = {
   lines: { text: string; href?: string; external?: boolean }[];
 };
 
-const tourInterestOptions = [
-  "Any / Need recommendation",
-  "Shaniwar Wada Heritage Walk",
-  "Sinhagad Fort Heritage Trail",
-  "Shivneri Fort Tour",
-  "Parvati Hill Heritage Walk",
-  "Kondane Caves Exploration",
-  "Gondeshwar Temple Architecture Tour",
-] as const;
+const defaultTourInterest = "Any / Need recommendation";
 
 const contactCards: ContactCard[] = [
   {
@@ -106,11 +100,33 @@ const initialFormState: SimpleContactFormState = {
   fullName: "",
   email: "",
   phone: "",
-  tourInterest: tourInterestOptions[0],
+  tourInterest: defaultTourInterest,
   preferredDate: "",
   numberOfPeople: "",
   message: "",
 };
+
+function buildTourInterestOptions(tours: ManagedTour[]) {
+  const seen = new Set<string>();
+  const options = [defaultTourInterest];
+
+  for (const tour of tours) {
+    const title = tour.title.trim();
+    if (!title) {
+      continue;
+    }
+
+    const key = title.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    options.push(title);
+  }
+
+  return options;
+}
 
 function buildEnquiryMessage(formData: SimpleContactFormState) {
   const note = formData.message.trim();
@@ -141,6 +157,8 @@ function mapToContactEnquiry(formData: SimpleContactFormState): ContactEnquiryIn
 }
 
 function Contact() {
+  const { tours } = Route.useLoaderData();
+  const tourInterestOptions = buildTourInterestOptions(tours);
   const [formData, setFormData] = useState<SimpleContactFormState>(initialFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitState, setSubmitState] = useState<{

@@ -22,6 +22,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ToursSlugRouteImport } from './routes/tours.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as ToursSlugShareImageRouteImport } from './routes/tours.$slug.share-image'
 
 const UpcomingRoute = UpcomingRouteImport.update({
   id: '/upcoming',
@@ -88,6 +89,11 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToursSlugShareImageRoute = ToursSlugShareImageRouteImport.update({
+  id: '/share-image',
+  path: '/share-image',
+  getParentRoute: () => ToursSlugRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -100,9 +106,10 @@ export interface FileRoutesByFullPath {
   '/upcoming': typeof UpcomingRoute
   '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/tours/$slug': typeof ToursSlugRoute
+  '/tours/$slug': typeof ToursSlugRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/tours/': typeof ToursIndexRoute
+  '/tours/$slug/share-image': typeof ToursSlugShareImageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -115,9 +122,10 @@ export interface FileRoutesByTo {
   '/upcoming': typeof UpcomingRoute
   '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/tours/$slug': typeof ToursSlugRoute
+  '/tours/$slug': typeof ToursSlugRouteWithChildren
   '/admin': typeof AdminIndexRoute
   '/tours': typeof ToursIndexRoute
+  '/tours/$slug/share-image': typeof ToursSlugShareImageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -131,9 +139,10 @@ export interface FileRoutesById {
   '/upcoming': typeof UpcomingRoute
   '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/tours/$slug': typeof ToursSlugRoute
+  '/tours/$slug': typeof ToursSlugRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/tours/': typeof ToursIndexRoute
+  '/tours/$slug/share-image': typeof ToursSlugShareImageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/tours/$slug'
     | '/admin/'
     | '/tours/'
+    | '/tours/$slug/share-image'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/tours/$slug'
     | '/admin'
     | '/tours'
+    | '/tours/$slug/share-image'
   id:
     | '__root__'
     | '/'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/tours/$slug'
     | '/admin/'
     | '/tours/'
+    | '/tours/$slug/share-image'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -193,7 +205,7 @@ export interface RootRouteChildren {
   StoriesRoute: typeof StoriesRoute
   UpcomingRoute: typeof UpcomingRoute
   AdminLoginRoute: typeof AdminLoginRoute
-  ToursSlugRoute: typeof ToursSlugRoute
+  ToursSlugRoute: typeof ToursSlugRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
   ToursIndexRoute: typeof ToursIndexRoute
 }
@@ -291,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tours/$slug/share-image': {
+      id: '/tours/$slug/share-image'
+      path: '/share-image'
+      fullPath: '/tours/$slug/share-image'
+      preLoaderRoute: typeof ToursSlugShareImageRouteImport
+      parentRoute: typeof ToursSlugRoute
+    }
   }
 }
 
@@ -304,6 +323,18 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface ToursSlugRouteChildren {
+  ToursSlugShareImageRoute: typeof ToursSlugShareImageRoute
+}
+
+const ToursSlugRouteChildren: ToursSlugRouteChildren = {
+  ToursSlugShareImageRoute: ToursSlugShareImageRoute,
+}
+
+const ToursSlugRouteWithChildren = ToursSlugRoute._addFileChildren(
+  ToursSlugRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -314,7 +345,7 @@ const rootRouteChildren: RootRouteChildren = {
   StoriesRoute: StoriesRoute,
   UpcomingRoute: UpcomingRoute,
   AdminLoginRoute: AdminLoginRoute,
-  ToursSlugRoute: ToursSlugRoute,
+  ToursSlugRoute: ToursSlugRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
   ToursIndexRoute: ToursIndexRoute,
 }

@@ -6,7 +6,7 @@ import {
   type ContactEnquiryInput,
 } from "@/data/contactEnquiry";
 import { siteContact } from "@/data/siteContact";
-import { staticShopItems, staticTestimonials } from "@/data/staticSiteContent";
+import { staticShopItems, staticTeamMembers, staticTestimonials } from "@/data/staticSiteContent";
 import { requireAdmin } from "@/lib/auth.server";
 import { getPool } from "@/lib/db.server";
 import type {
@@ -16,6 +16,7 @@ import type {
   ManagedTour,
   PublicSiteContent,
   ShopItem,
+  TeamMember,
   Testimonial,
 } from "@/lib/content.types";
 
@@ -182,6 +183,17 @@ function mapTestimonialRow(row: any): Testimonial {
   };
 }
 
+function mapTeamMemberRow(row: any): TeamMember {
+  return {
+    id: Number(row.id),
+    slug: String(row.slug || ""),
+    name: String(row.name || ""),
+    role: String(row.role || ""),
+    description: String(row.description || ""),
+    source: "database",
+  };
+}
+
 function mapCategoryRow(row: any): ContentCategory {
   return {
     id: Number(row.id),
@@ -190,6 +202,15 @@ function mapCategoryRow(row: any): ContentCategory {
     description: String(row.description || ""),
     source: "database",
   };
+}
+
+function mapStaticTour(tour: (typeof staticTours)[number]): ManagedTour {
+  return { ...tour, source: "static" as const };
+}
+
+function findStaticTourBySlug(slug: string) {
+  const normalizedSlug = slug.trim().toLowerCase();
+  return staticTours.find((tour) => tour.slug.toLowerCase() === normalizedSlug);
 }
 
 export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
@@ -207,6 +228,9 @@ export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
     const [testimonialRows] = await pool.query<any[]>(
       "SELECT * FROM cms_testimonials ORDER BY updated_at DESC, id DESC",
     );
+    const [teamMemberRows] = await pool.query<any[]>(
+      "SELECT * FROM about_team_members ORDER BY updated_at DESC, id DESC",
+    );
     const [shopRows] = await pool.query<any[]>(
       "SELECT * FROM shop_items ORDER BY updated_at DESC, id DESC",
     );
@@ -217,20 +241,19 @@ export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
     const databaseTours = tourRows.map(mapTourRow);
     const databaseBlogs = blogRows.map(mapBlogRow);
     const databaseTestimonials = testimonialRows.map(mapTestimonialRow);
+    const databaseTeamMembers = teamMemberRows.map(mapTeamMemberRow);
     const databaseShopItems = shopRows.map(mapShopRow);
     const databaseCategories = categoryRows.map(mapCategoryRow);
     const staticCategories = buildStaticCategories();
 
     return {
-      tours: mergeBySlug(
-        databaseTours,
-        staticTours.map((tour) => ({ ...tour, source: "static" as const })),
-      ),
+      tours: mergeBySlug(databaseTours, staticTours.map(mapStaticTour)),
       blogPosts: mergeBySlug(
         databaseBlogs,
         staticBlogPosts.map((post) => ({ ...post, source: "static" as const })),
       ),
       testimonials: [...databaseTestimonials, ...staticTestimonials],
+      teamMembers: mergeBySlug(databaseTeamMembers, staticTeamMembers),
       shopItems: mergeBySlug(databaseShopItems, staticShopItems),
       categories: mergeBySlug(databaseCategories, staticCategories),
       databaseAvailable: true,
@@ -239,9 +262,10 @@ export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
     console.error("Unable to load MySQL content, falling back to static content.", error);
 
     return {
-      tours: staticTours.map((tour) => ({ ...tour, source: "static" as const })),
+      tours: staticTours.map(mapStaticTour),
       blogPosts: staticBlogPosts.map((post) => ({ ...post, source: "static" as const })),
       testimonials: staticTestimonials,
+      teamMembers: staticTeamMembers,
       shopItems: staticShopItems,
       categories: buildStaticCategories(),
       databaseAvailable: false,
@@ -295,6 +319,14 @@ export type SaveTestimonialInput = {
   name: string;
   role: string;
   text: string;
+};
+
+export type SaveTeamMemberInput = {
+  id?: number;
+  slug?: string;
+  name: string;
+  role?: string;
+  description?: string;
 };
 
 export type SaveShopItemInput = {
@@ -664,6 +696,67 @@ export async function deleteTestimonialById(id: number) {
   await requireAdmin();
   const pool = await getPool();
   await pool.execute("DELETE FROM cms_testimonials WHERE id = ?", [id]);
+}
+
+export async function upsertTeamMember(input: SaveTeamMemberInput) {
+  await requireAdmin();
+  const pool = await getPool();
+  const name = input.name.trim();
+  const slug = slugify(input.slug?.trim() || name);
+  const role = input.role?.trim() ?? "";
+  const description = input.description?.trim() ?? "";
+
+  if (!name) {
+    throw new Error("Team member name is required.");
+  }
+
+  if (!slug) {
+    throw new Error("Team member slug is required.");
+  }
+
+  if (input.id) {
+    await pool.execute(
+      "UPDATE about_team_members SET slug = ?, name = ?, role = ?, description = ? WHERE id = ?",
+      [slug, name, role, description, input.id],
+    );
+  } else {
+    await pool.execute(
+      "INSERT INTO about_team_members (slug, name, role, description) VALUES (?, ?, ?, ?)",
+      [slug, name, role, description],
+    );
+  }
+}
+
+export async function fetchPublicTourBySlug(slug: string): Promise<ManagedTour | undefined> {
+  const staticTour = findStaticTourBySlug(slug);
+
+  try {
+    const pool = await getPool();
+    const [rows] = await pool.execute<any[]>(
+      `
+        SELECT cms_tours.*, categories.name AS category_name
+        FROM cms_tours
+        LEFT JOIN categories ON categories.id = cms_tours.category_id
+        WHERE LOWER(cms_tours.slug) = ?
+        LIMIT 1
+      `,
+      [slug.trim().toLowerCase()],
+    );
+
+    if (rows.length > 0) {
+      return mapTourRow(rows[0]);
+    }
+  } catch (error) {
+    console.error(`Unable to load tour "${slug}" from MySQL, falling back to static content.`, error);
+  }
+
+  return staticTour ? mapStaticTour(staticTour) : undefined;
+}
+
+export async function deleteTeamMemberById(id: number) {
+  await requireAdmin();
+  const pool = await getPool();
+  await pool.execute("DELETE FROM about_team_members WHERE id = ?", [id]);
 }
 
 export async function upsertShopItem(input: SaveShopItemInput) {

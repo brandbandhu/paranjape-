@@ -5,7 +5,10 @@ import { Layout } from "@/components/site/Layout";
 import { Breadcrumb } from "@/components/site/Breadcrumb";
 import { TourCard } from "@/components/site/TourCard";
 import { WhatsAppIcon } from "@/components/site/WhatsAppIcon";
+import { createWhatsAppUrl } from "@/data/siteContact";
 import { getPublicSiteContent } from "@/lib/content.functions";
+import { buildTourPagePath, toAbsoluteSiteUrl } from "@/lib/site-url";
+import { getTourDisplayImage, getTourShareImageUrl } from "@/lib/tour-images";
 
 export const Route = createFileRoute("/tours/$slug")({
   loader: async ({ params }) => {
@@ -21,11 +24,17 @@ export const Route = createFileRoute("/tours/$slug")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.tour.title} â€” Paranjape Tours` },
+          { title: `${loaderData.tour.title} | Paranjape Tours` },
           { name: "description", content: loaderData.tour.short },
           { property: "og:title", content: loaderData.tour.title },
           { property: "og:description", content: loaderData.tour.short },
-          { property: "og:image", content: loaderData.tour.image },
+          { property: "og:type", content: "website" },
+          { property: "og:url", content: toAbsoluteSiteUrl(buildTourPagePath(loaderData.tour.slug)) },
+          { property: "og:image", content: getTourShareImageUrl(loaderData.tour) },
+          { name: "twitter:card", content: "summary_large_image" },
+          { name: "twitter:title", content: loaderData.tour.title },
+          { name: "twitter:description", content: loaderData.tour.short },
+          { name: "twitter:image", content: getTourShareImageUrl(loaderData.tour) },
         ]
       : [],
   }),
@@ -67,6 +76,7 @@ export const Route = createFileRoute("/tours/$slug")({
 
 function TourDetail() {
   const { tour, tours } = Route.useLoaderData();
+  const heroImage = getTourDisplayImage(tour);
   const related = tours
     .filter((t) => t.slug !== tour.slug && t.category === tour.category)
     .slice(0, 3);
@@ -83,11 +93,7 @@ function TourDetail() {
   return (
     <Layout>
       <section className="relative h-[64vh] min-h-[420px] w-full overflow-hidden">
-        <img
-          src={tour.image}
-          alt={tour.title}
-          className="absolute inset-0 h-full w-full object-cover"
-        />
+        <img src={heroImage} alt={tour.title} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-b from-primary/60 via-primary/40 to-background" />
         <div className="container-prose relative z-10 flex h-full flex-col justify-end pb-10 text-primary-foreground">
           <Breadcrumb
@@ -117,7 +123,7 @@ function TourDetail() {
               Enquire Now
             </Link>
             <a
-              href={`https://wa.me/910000000000?text=${encodeURIComponent("I'd like to know more about " + tour.title)}`}
+              href={createWhatsAppUrl(`I'd like to know more about ${tour.title}`)}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-whatsapp px-5 py-3 text-sm font-medium text-white"
@@ -239,10 +245,7 @@ function TourDetail() {
           <Block title="Photo Gallery">
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
               {tour.gallery.map((image, index) => (
-                <div
-                  key={`${tour.slug}-${index}`}
-                  className="image-zoom aspect-square overflow-hidden rounded-xl"
-                >
+                <div key={`${tour.slug}-${index}`} className="image-zoom aspect-square overflow-hidden rounded-xl">
                   <img
                     src={image.src}
                     alt={image.alt}
@@ -276,7 +279,7 @@ function TourDetail() {
               Send Enquiry
             </Link>
             <a
-              href="https://wa.me/910000000000"
+              href={createWhatsAppUrl(`I'd like to enquire about ${tour.title}`)}
               target="_blank"
               rel="noreferrer"
               className="mt-3 block rounded-full bg-whatsapp px-5 py-3 text-center text-sm font-medium text-white"
@@ -290,7 +293,7 @@ function TourDetail() {
               We design private heritage trips for families, schools and corporate groups.
             </p>
             <Link to="/contact" className="mt-4 inline-flex text-sm font-medium text-primary">
-              Plan with us â†’
+              Plan with us
             </Link>
           </div>
         </aside>

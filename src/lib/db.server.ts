@@ -2,13 +2,14 @@ import mysql from "mysql2/promise";
 import type { Pool } from "mysql2/promise";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { adminTourCategoryPresets } from "@/data/adminCategories";
+import { defaultTeamMembers } from "@/data/teamMembers";
 
 const DEFAULT_DB_HOST = process.env.MYSQL_HOST ?? "127.0.0.1";
 const DEFAULT_DB_PORT = Number(process.env.MYSQL_PORT ?? "3306");
 const DEFAULT_DB_USER = process.env.MYSQL_USER ?? "root";
 const DEFAULT_DB_PASSWORD = process.env.MYSQL_PASSWORD ?? "root";
 const DEFAULT_DB_NAME = process.env.MYSQL_DATABASE ?? "paranjpe_tours";
-const DB_SCHEMA_VERSION = "paranjpe-cms-v3";
+const DB_SCHEMA_VERSION = "paranjpe-cms-v4";
 
 const SCRYPT_KEY_LENGTH = 64;
 
@@ -61,6 +62,18 @@ async function seedDefaultCategories(pool: Pool) {
           description = IF(categories.description = '', VALUES(description), categories.description)
       `,
       [category.name, category.slug, category.description],
+    );
+  }
+}
+
+async function seedDefaultTeamMembers(pool: Pool) {
+  for (const member of defaultTeamMembers) {
+    await pool.execute(
+      `
+        INSERT IGNORE INTO about_team_members (slug, name, role, description)
+        VALUES (?, ?, ?, ?)
+      `,
+      [member.slug, member.name, member.role, member.description],
     );
   }
 }
@@ -144,6 +157,18 @@ async function createTables(pool: Pool) {
       name VARCHAR(255) NOT NULL,
       role VARCHAR(255) NOT NULL,
       text TEXT NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS about_team_members (
+      id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      slug VARCHAR(255) NOT NULL UNIQUE,
+      name VARCHAR(255) NOT NULL,
+      role VARCHAR(255) NOT NULL,
+      description TEXT NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
@@ -244,6 +269,7 @@ async function initializePool() {
   await createTables(pool);
   await seedDefaultAdmin(pool);
   await seedDefaultCategories(pool);
+  await seedDefaultTeamMembers(pool);
 
   return pool;
 }
@@ -266,6 +292,7 @@ export async function getPool() {
         await createTables(pool);
         await seedDefaultAdmin(pool);
         await seedDefaultCategories(pool);
+        await seedDefaultTeamMembers(pool);
         globalScope.__paranjpeMysqlSchemaVersion = DB_SCHEMA_VERSION;
       })().finally(() => {
         globalScope.__paranjpeMysqlSchemaReady = undefined;

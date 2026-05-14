@@ -36,6 +36,15 @@ export type Testimonial = {
   source?: "database" | "static";
 };
 
+export type TeamMember = {
+  id?: number;
+  slug: string;
+  name: string;
+  role: string;
+  description: string;
+  source?: "database" | "static";
+};
+
 export type ShopItem = {
   id?: number;
   slug: string;
@@ -58,6 +67,7 @@ export type PublicSiteContent = {
   tours: ManagedTour[];
   blogPosts: BlogPost[];
   testimonials: Testimonial[];
+  teamMembers: TeamMember[];
   shopItems: ShopItem[];
   categories: ContentCategory[];
   databaseAvailable: boolean;

@@ -4,7 +4,8 @@ import heroWalk from "@/assets/hero-walk.jpg";
 import shaniwar from "@/assets/tour-shaniwar.jpg";
 import sinhagad from "@/assets/tour-sinhagad.jpg";
 import shivneri from "@/assets/tour-shivneri.jpg";
-import type { ShopItem, Testimonial } from "@/lib/content.types";
+import { defaultTeamMembers } from "@/data/teamMembers";
+import type { ShopItem, TeamMember, Testimonial } from "@/lib/content.types";
 
 export const staticTestimonials: Testimonial[] = [
   {
@@ -32,6 +33,11 @@ export const staticTestimonials: Testimonial[] = [
     source: "static",
   },
 ];
+
+export const staticTeamMembers: TeamMember[] = defaultTeamMembers.map((member) => ({
+  ...member,
+  source: "static",
+}));
 
 export const staticShopItems: ShopItem[] = [
   {
