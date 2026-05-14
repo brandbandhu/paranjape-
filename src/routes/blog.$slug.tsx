@@ -2,6 +2,7 @@ import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
+import { resolveBlogImage } from "@/lib/blog-images";
 import { getPublicSiteContent } from "@/lib/content.functions";
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/blog/$slug")({
           { name: "description", content: loaderData.post.excerpt },
           { property: "og:title", content: loaderData.post.title },
           { property: "og:description", content: loaderData.post.excerpt },
-          { property: "og:image", content: loaderData.post.image },
+          { property: "og:image", content: resolveBlogImage(loaderData.post) },
         ]
       : [],
   }),
@@ -33,6 +34,7 @@ export const Route = createFileRoute("/blog/$slug")({
 
 function BlogDetail() {
   const { post, recentPosts } = Route.useLoaderData();
+  const postImage = resolveBlogImage(post);
   const paragraphs = (post.content?.trim() || post.excerpt)
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
@@ -48,7 +50,7 @@ function BlogDetail() {
           { label: "Blog", to: "/blog" },
           { label: post.title },
         ]}
-        image={post.image}
+        image={postImage}
       />
 
       <section className="container-prose grid gap-12 py-16 lg:grid-cols-[2fr_1fr]">
@@ -58,7 +60,7 @@ function BlogDetail() {
           </p>
           <h1 className="mt-4 font-serif text-3xl text-primary md:text-5xl">{post.title}</h1>
           <img
-            src={post.image}
+            src={postImage}
             alt={post.title}
             className="mt-8 aspect-[16/9] w-full rounded-[1.5rem] object-cover"
             loading="lazy"
