@@ -23,6 +23,7 @@ import {
   deleteBlogPost,
   deleteCategory,
   deleteGalleryItem,
+  deleteLegacyContent,
   deleteShopItem,
   deleteTeamMember,
   deleteTestimonial,
@@ -89,6 +90,7 @@ type TourGalleryDraftItem = {
 
 type TestimonialDraft = {
   id?: number;
+  legacyKey?: string;
   name: string;
   role: string;
   text: string;
@@ -104,6 +106,7 @@ type TeamMemberDraft = {
 
 type ShopItemDraft = {
   id?: number;
+  legacyKey?: string;
   slug: string;
   title: string;
   category: string;
@@ -125,6 +128,7 @@ type GalleryDraft = {
 
 type BlogDraft = {
   id?: number;
+  legacyKey?: string;
   slug: string;
   title: string;
   category: string;
@@ -145,6 +149,7 @@ type CategoryPresetCard = {
 
 type TourDraft = {
   id?: number;
+  legacyKey?: string;
   slug: string;
   title: string;
   status: string;
@@ -336,6 +341,7 @@ function categoryPresetToDraft(category: CategoryPresetCard): CategoryDraft {
 function testimonialToDraft(testimonial?: Testimonial): TestimonialDraft {
   return {
     id: testimonial?.id,
+    legacyKey: testimonial?.legacyKey,
     name: testimonial?.name ?? "",
     role: testimonial?.role ?? "",
     text: testimonial?.text ?? "",
@@ -355,6 +361,7 @@ function teamMemberToDraft(member?: TeamMember): TeamMemberDraft {
 function shopItemToDraft(item?: ShopItem): ShopItemDraft {
   return {
     id: item?.id,
+    legacyKey: item?.legacyKey,
     slug: item?.slug ?? "",
     title: item?.title ?? "",
     category: item?.category ?? "",
@@ -393,6 +400,7 @@ function blogDateToInput(post?: BlogPost) {
 function blogToDraft(post?: BlogPost): BlogDraft {
   return {
     id: post?.id,
+    legacyKey: post?.legacyKey,
     slug: post?.slug ?? "",
     title: post?.title ?? "",
     category: post?.category ?? "",
@@ -405,6 +413,7 @@ function blogToDraft(post?: BlogPost): BlogDraft {
 
 function createEmptyTourDraft(categories: ContentCategory[]): TourDraft {
   return {
+    legacyKey: undefined,
     slug: "",
     title: "",
     status: "published",
@@ -440,6 +449,7 @@ function tourToDraft(tour: ManagedTour, categories: ContentCategory[]): TourDraf
 
   return {
     id: tour.id,
+    legacyKey: tour.legacyKey,
     slug: tour.slug,
     title: tour.title,
     status: tour.status ?? "published",
@@ -488,6 +498,7 @@ function draftToTourInput(draft: TourDraft): SaveTourInput {
 
   return {
     id: draft.id,
+    legacyKey: draft.legacyKey,
     slug: draft.slug,
     title: draft.title,
     status: draft.status === "draft" ? "draft" : "published",
@@ -598,6 +609,10 @@ function AdminDashboard() {
   const [shopDraft, setShopDraft] = useState<ShopItemDraft>(() => shopItemToDraft());
   const [galleryDraft, setGalleryDraft] = useState<GalleryDraft>(() => galleryToDraft());
   const [blogDraft, setBlogDraft] = useState<BlogDraft>(() => blogToDraft());
+  const isLegacyTourDraft = Boolean(tourDraft.legacyKey && !tourDraft.id);
+  const isLegacyTestimonialDraft = Boolean(testimonialDraft.legacyKey && !testimonialDraft.id);
+  const isLegacyShopDraft = Boolean(shopDraft.legacyKey && !shopDraft.id);
+  const isLegacyBlogDraft = Boolean(blogDraft.legacyKey && !blogDraft.id);
 
   const sidebarItems: Array<{
     id: AdminSectionId;
@@ -685,6 +700,10 @@ function AdminDashboard() {
     } finally {
       setBusyKey(null);
     }
+  }
+
+  async function hideLegacyItem(type: "tour" | "blog" | "testimonial" | "shop", legacyKey: string) {
+    await deleteLegacyContent({ data: { type, legacyKey } });
   }
 
   async function handleLogout() {
@@ -885,8 +904,8 @@ function AdminDashboard() {
                   {activeSidebarItem.label}
                 </h2>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-white/55">
-                  {activeSidebarItem.note}. Legacy frontend items stay safe, and matching slugs can
-                  still override public pages from the admin side.
+                  {activeSidebarItem.note}. Legacy frontend items can now be imported into admin
+                  management or hidden directly from this dashboard.
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
@@ -1139,8 +1158,18 @@ function AdminDashboard() {
               className={`mt-6 ${darkPanelClass}`}
             >
               <FormHeader
-                title={tourDraft.id ? "Edit tour" : "Add tour"}
-                description="Upload multiple tour images, choose the cover image, and use one line per item in the structured text fields."
+                title={
+                  tourDraft.id
+                    ? "Edit tour"
+                    : isLegacyTourDraft
+                      ? "Import legacy tour"
+                      : "Add tour"
+                }
+                description={
+                  isLegacyTourDraft
+                    ? "This legacy tour will be copied into the CMS and the old frontend-only version will be hidden after you save."
+                    : "Upload multiple tour images, choose the cover image, and use one line per item in the structured text fields."
+                }
                 onReset={() => setTourDraft(createEmptyTourDraft(adminCategories))}
               />
 
@@ -1518,7 +1547,13 @@ function AdminDashboard() {
 
               <SubmitButton
                 busy={busyKey === "save-tour"}
-                label={tourDraft.id ? "Update tour" : "Create tour"}
+                label={
+                  tourDraft.id
+                    ? "Update tour"
+                    : isLegacyTourDraft
+                      ? "Save as admin-managed tour"
+                      : "Create tour"
+                }
               />
             </form>
               </SectionCard>
@@ -1685,12 +1720,45 @@ function AdminDashboard() {
                               void runTask("delete-testimonial", "Testimonial deleted.", async () => {
                                 await deleteTestimonial({ data: { id: testimonial.id! } });
                                 setTestimonialDraft(testimonialToDraft());
-                              });
+                            });
+                          }}
+                        />
+                      </div>
+                    ) : (
+                        <div className="flex flex-wrap gap-2">
+                          <SmallButton
+                            label="Edit"
+                            icon={PencilLine}
+                            onClick={() => setTestimonialDraft(testimonialToDraft(testimonial))}
+                          />
+                          <DangerButton
+                            label="Delete"
+                            icon={Trash2}
+                            onClick={() => {
+                              if (
+                                !testimonial.legacyKey ||
+                                !window.confirm(
+                                  `Hide the legacy testimonial from ${testimonial.name}?`,
+                                )
+                              ) {
+                                return;
+                              }
+
+                              void runTask(
+                                "delete-legacy-testimonial",
+                                "Legacy testimonial hidden.",
+                                async () => {
+                                  await hideLegacyItem("testimonial", testimonial.legacyKey!);
+                                  setTestimonialDraft((prev) =>
+                                    prev.legacyKey === testimonial.legacyKey
+                                      ? testimonialToDraft()
+                                      : prev,
+                                  );
+                                },
+                              );
                             }}
                           />
                         </div>
-                      ) : (
-                        <LegacyNote text="Legacy homepage testimonial." />
                       )
                     }
                   />
@@ -1709,8 +1777,18 @@ function AdminDashboard() {
                 className={darkPanelClass}
               >
                 <FormHeader
-                  title={testimonialDraft.id ? "Edit testimonial" : "Add testimonial"}
-                  description="These entries appear along with the current traveller quotes on the homepage."
+                  title={
+                    testimonialDraft.id
+                      ? "Edit testimonial"
+                      : isLegacyTestimonialDraft
+                        ? "Import legacy testimonial"
+                        : "Add testimonial"
+                  }
+                  description={
+                    isLegacyTestimonialDraft
+                      ? "Saving this legacy testimonial creates an admin-managed copy and hides the older frontend-only version."
+                      : "These entries appear along with the current traveller quotes on the homepage."
+                  }
                   onReset={() => setTestimonialDraft(testimonialToDraft())}
                 />
                 <div className="mt-6 grid gap-4">
@@ -1740,7 +1818,13 @@ function AdminDashboard() {
                 </div>
                 <SubmitButton
                   busy={busyKey === "save-testimonial"}
-                  label={testimonialDraft.id ? "Update testimonial" : "Create testimonial"}
+                  label={
+                    testimonialDraft.id
+                      ? "Update testimonial"
+                      : isLegacyTestimonialDraft
+                        ? "Save as admin-managed testimonial"
+                        : "Create testimonial"
+                  }
                 />
               </form>
             </div>
@@ -1885,12 +1969,37 @@ function AdminDashboard() {
                               void runTask("delete-shop", "Shop item deleted.", async () => {
                                 await deleteShopItem({ data: { id: item.id! } });
                                 setShopDraft(shopItemToDraft());
+                            });
+                          }}
+                        />
+                      </div>
+                    ) : (
+                        <div className="flex flex-wrap gap-2">
+                          <SmallButton
+                            label="Edit"
+                            icon={PencilLine}
+                            onClick={() => setShopDraft(shopItemToDraft(item))}
+                          />
+                          <DangerButton
+                            label="Delete"
+                            icon={Trash2}
+                            onClick={() => {
+                              if (
+                                !item.legacyKey ||
+                                !window.confirm(`Hide the legacy shop item "${item.title}"?`)
+                              ) {
+                                return;
+                              }
+
+                              void runTask("delete-legacy-shop", "Legacy shop item hidden.", async () => {
+                                await hideLegacyItem("shop", item.legacyKey!);
+                                setShopDraft((prev) =>
+                                  prev.legacyKey === item.legacyKey ? shopItemToDraft() : prev,
+                                );
                               });
                             }}
                           />
                         </div>
-                      ) : (
-                        <LegacyNote text="Legacy shop item. Use the same slug to override it." />
                       )
                     }
                   />
@@ -1909,8 +2018,18 @@ function AdminDashboard() {
                 className={darkPanelClass}
               >
                 <FormHeader
-                  title={shopDraft.id ? "Edit shop item" : "Add shop item"}
-                  description="Use this for books, kits, maps, souvenirs or any shop card you want to show."
+                  title={
+                    shopDraft.id
+                      ? "Edit shop item"
+                      : isLegacyShopDraft
+                        ? "Import legacy shop item"
+                        : "Add shop item"
+                  }
+                  description={
+                    isLegacyShopDraft
+                      ? "Saving this legacy product moves it under admin control and hides the older frontend-only card."
+                      : "Use this for books, kits, maps, souvenirs or any shop card you want to show."
+                  }
                   onReset={() => setShopDraft(shopItemToDraft())}
                 />
                 <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -1965,7 +2084,13 @@ function AdminDashboard() {
                 </div>
                 <SubmitButton
                   busy={busyKey === "save-shop"}
-                  label={shopDraft.id ? "Update shop item" : "Create shop item"}
+                  label={
+                    shopDraft.id
+                      ? "Update shop item"
+                      : isLegacyShopDraft
+                        ? "Save as admin-managed shop item"
+                        : "Create shop item"
+                  }
                 />
               </form>
             </div>
@@ -2006,12 +2131,37 @@ function AdminDashboard() {
                               void runTask("delete-blog", "Blog post deleted.", async () => {
                                 await deleteBlogPost({ data: { id: post.id! } });
                                 setBlogDraft(blogToDraft());
+                            });
+                          }}
+                        />
+                      </div>
+                    ) : (
+                        <div className="flex flex-wrap gap-2">
+                          <SmallButton
+                            label="Edit"
+                            icon={PencilLine}
+                            onClick={() => setBlogDraft(blogToDraft(post))}
+                          />
+                          <DangerButton
+                            label="Delete"
+                            icon={Trash2}
+                            onClick={() => {
+                              if (
+                                !post.legacyKey ||
+                                !window.confirm(`Hide the legacy blog "${post.title}"?`)
+                              ) {
+                                return;
+                              }
+
+                              void runTask("delete-legacy-blog", "Legacy blog hidden.", async () => {
+                                await hideLegacyItem("blog", post.legacyKey!);
+                                setBlogDraft((prev) =>
+                                  prev.legacyKey === post.legacyKey ? blogToDraft() : prev,
+                                );
                               });
                             }}
                           />
                         </div>
-                      ) : (
-                        <LegacyNote text="Legacy blog post. Use the same slug to override it." />
                       )
                     }
                   />
@@ -2030,8 +2180,18 @@ function AdminDashboard() {
                 className={darkPanelClass}
               >
                 <FormHeader
-                  title={blogDraft.id ? "Edit blog post" : "Add blog post"}
-                  description="Use the content field for the full article body. Separate paragraphs with blank lines."
+                  title={
+                    blogDraft.id
+                      ? "Edit blog post"
+                      : isLegacyBlogDraft
+                        ? "Import legacy blog post"
+                        : "Add blog post"
+                  }
+                  description={
+                    isLegacyBlogDraft
+                      ? "Saving this legacy article creates a CMS-managed copy and hides the older frontend-only version."
+                      : "Use the content field for the full article body. Separate paragraphs with blank lines."
+                  }
                   onReset={() => setBlogDraft(blogToDraft())}
                 />
                 <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -2088,7 +2248,13 @@ function AdminDashboard() {
                 </div>
                 <SubmitButton
                   busy={busyKey === "save-blog"}
-                  label={blogDraft.id ? "Update blog post" : "Create blog post"}
+                  label={
+                    blogDraft.id
+                      ? "Update blog post"
+                      : isLegacyBlogDraft
+                        ? "Save as admin-managed blog"
+                        : "Create blog post"
+                  }
                 />
               </form>
             </div>
@@ -2229,10 +2395,6 @@ function SourceBadge({ source }: { source?: string }) {
       {source === "database" ? "Admin managed" : "Legacy frontend"}
     </span>
   );
-}
-
-function LegacyNote({ text }: { text: string }) {
-  return <p className="text-xs leading-5 text-white/45">{text}</p>;
 }
 
 function SmallButton({

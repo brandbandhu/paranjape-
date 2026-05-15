@@ -243,6 +243,19 @@ async function createTables(pool: Pool) {
   `);
 
   await pool.execute(`
+    CREATE TABLE IF NOT EXISTS legacy_content_visibility (
+      id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      content_type VARCHAR(40) NOT NULL,
+      legacy_key VARCHAR(255) NOT NULL,
+      hidden TINYINT(1) NOT NULL DEFAULT 1,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY uq_legacy_content_visibility (content_type, legacy_key),
+      INDEX idx_legacy_content_visibility_hidden (hidden)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.execute(`
     CREATE TABLE IF NOT EXISTS contact_enquiries (
       id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
       category_value VARCHAR(80) NOT NULL,

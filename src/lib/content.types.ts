@@ -3,6 +3,7 @@ import type { Tour } from "@/data/tours";
 export type ManagedTour = Tour & {
   id?: number;
   categoryId?: number;
+  legacyKey?: string;
   source?: "database" | "static";
 };
 
@@ -23,6 +24,7 @@ export type BlogPost = {
   excerpt: string;
   content?: string;
   image: string;
+  legacyKey?: string;
   sourceName?: string;
   sourceUrl?: string;
   source?: "database" | "static";
@@ -33,6 +35,7 @@ export type Testimonial = {
   name: string;
   role: string;
   text: string;
+  legacyKey?: string;
   source?: "database" | "static";
 };
 
@@ -54,6 +57,7 @@ export type ShopItem = {
   title: string;
   price: string;
   description: string;
+  legacyKey?: string;
   source?: "database" | "static";
 };
 

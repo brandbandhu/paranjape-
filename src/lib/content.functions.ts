@@ -6,12 +6,14 @@ import {
   deleteBlogPostById,
   deleteCategoryById,
   deleteGalleryItemById,
+  hideLegacyContent,
   deleteShopItemById,
   deleteTeamMemberById,
   deleteTestimonialById,
   deleteTourById,
   fetchAdminDashboardData,
   fetchPublicSiteContent,
+  type LegacyContentType,
   type SaveBlogPostInput,
   type SaveCategoryInput,
   type SaveGalleryItemInput,
@@ -154,6 +156,13 @@ export const deleteBlogPost = createServerFn({ method: "POST" })
   .inputValidator((data: { id: number }) => data)
   .handler(async ({ data }) => {
     await deleteBlogPostById(data.id);
+    return { success: true };
+  });
+
+export const deleteLegacyContent = createServerFn({ method: "POST" })
+  .inputValidator((data: { type: LegacyContentType; legacyKey: string }) => data)
+  .handler(async ({ data }) => {
+    await hideLegacyContent(data);
     return { success: true };
   });
 

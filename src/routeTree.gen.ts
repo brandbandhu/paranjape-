@@ -17,10 +17,10 @@ import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as GeneralFaqsRouteImport } from './routes/general-faqs'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as ContactRouteImport } from './routes/contact'
-import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ToursIndexRouteImport } from './routes/tours.index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ToursSlugRouteImport } from './routes/tours.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -67,11 +67,6 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -85,6 +80,11 @@ const IndexRoute = IndexRouteImport.update({
 const ToursIndexRoute = ToursIndexRouteImport.update({
   id: '/tours/',
   path: '/tours/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -116,7 +116,6 @@ const ToursSlugShareImageRoute = ToursSlugShareImageRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
   '/general-faqs': typeof GeneralFaqsRoute
@@ -129,13 +128,13 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/tours/$slug': typeof ToursSlugRouteWithChildren
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/tours/': typeof ToursIndexRoute
   '/tours/$slug/share-image': typeof ToursSlugShareImageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
   '/general-faqs': typeof GeneralFaqsRoute
@@ -148,6 +147,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/tours/$slug': typeof ToursSlugRouteWithChildren
   '/admin': typeof AdminIndexRoute
+  '/blog': typeof BlogIndexRoute
   '/tours': typeof ToursIndexRoute
   '/tours/$slug/share-image': typeof ToursSlugShareImageRoute
 }
@@ -155,7 +155,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
   '/general-faqs': typeof GeneralFaqsRoute
@@ -168,6 +167,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/tours/$slug': typeof ToursSlugRouteWithChildren
   '/admin/': typeof AdminIndexRoute
+  '/blog/': typeof BlogIndexRoute
   '/tours/': typeof ToursIndexRoute
   '/tours/$slug/share-image': typeof ToursSlugShareImageRoute
 }
@@ -176,7 +176,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/blog'
     | '/contact'
     | '/gallery'
     | '/general-faqs'
@@ -189,13 +188,13 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/tours/$slug'
     | '/admin/'
+    | '/blog/'
     | '/tours/'
     | '/tours/$slug/share-image'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
-    | '/blog'
     | '/contact'
     | '/gallery'
     | '/general-faqs'
@@ -208,13 +207,13 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/tours/$slug'
     | '/admin'
+    | '/blog'
     | '/tours'
     | '/tours/$slug/share-image'
   id:
     | '__root__'
     | '/'
     | '/about'
-    | '/blog'
     | '/contact'
     | '/gallery'
     | '/general-faqs'
@@ -227,6 +226,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/tours/$slug'
     | '/admin/'
+    | '/blog/'
     | '/tours/'
     | '/tours/$slug/share-image'
   fileRoutesById: FileRoutesById
@@ -234,7 +234,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
-  BlogRoute: typeof BlogRouteWithChildren
   ContactRoute: typeof ContactRoute
   GalleryRoute: typeof GalleryRoute
   GeneralFaqsRoute: typeof GeneralFaqsRoute
@@ -246,6 +245,7 @@ export interface RootRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   ToursSlugRoute: typeof ToursSlugRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   ToursIndexRoute: typeof ToursIndexRoute
 }
 
@@ -307,13 +307,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -333,6 +326,13 @@ declare module '@tanstack/react-router' {
       path: '/tours'
       fullPath: '/tours/'
       preLoaderRoute: typeof ToursIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -373,16 +373,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface BlogRouteChildren {
-  BlogSlugRoute: typeof BlogSlugRoute
-}
-
-const BlogRouteChildren: BlogRouteChildren = {
-  BlogSlugRoute: BlogSlugRoute,
-}
-
-const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
-
 interface ToursSlugRouteChildren {
   ToursSlugShareImageRoute: typeof ToursSlugShareImageRoute
 }
@@ -398,7 +388,6 @@ const ToursSlugRouteWithChildren = ToursSlugRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
-  BlogRoute: BlogRouteWithChildren,
   ContactRoute: ContactRoute,
   GalleryRoute: GalleryRoute,
   GeneralFaqsRoute: GeneralFaqsRoute,
@@ -410,6 +399,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   ToursSlugRoute: ToursSlugRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
+  BlogIndexRoute: BlogIndexRoute,
   ToursIndexRoute: ToursIndexRoute,
 }
 export const routeTree = rootRouteImport
