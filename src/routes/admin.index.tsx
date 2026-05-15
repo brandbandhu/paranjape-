@@ -22,6 +22,7 @@ import {
 import {
   deleteBlogPost,
   deleteCategory,
+  deleteGalleryItem,
   deleteShopItem,
   deleteTeamMember,
   deleteTestimonial,
@@ -30,6 +31,7 @@ import {
   logoutAdmin,
   saveBlogPost,
   saveCategory,
+  saveGalleryItem,
   saveShopItem,
   saveTeamMember,
   saveTestimonial,
@@ -38,6 +40,7 @@ import {
 import type {
   SaveBlogPostInput,
   SaveCategoryInput,
+  SaveGalleryItemInput,
   SaveShopItemInput,
   SaveTeamMemberInput,
   SaveTestimonialInput,
@@ -46,6 +49,7 @@ import type {
 import type {
   BlogPost,
   ContentCategory,
+  GalleryItem,
   ManagedTour,
   ShopItem,
   TeamMember,
@@ -67,7 +71,7 @@ type Feedback =
     }
   | null;
 
-type AdminSectionId = "categories" | "tours" | "testimonials" | "team" | "shop" | "blogs";
+type AdminSectionId = "categories" | "tours" | "gallery" | "testimonials" | "team" | "shop" | "blogs";
 type ImageInputMode = "upload" | "url";
 
 type CategoryDraft = {
@@ -109,6 +113,16 @@ type ShopItemDraft = {
   image: string;
 };
 
+type GalleryDraft = {
+  id?: number;
+  slug: string;
+  title: string;
+  image: string;
+  description: string;
+  sortOrder: string;
+  isPublished: string;
+};
+
 type BlogDraft = {
   id?: number;
   slug: string;
@@ -133,9 +147,12 @@ type TourDraft = {
   id?: number;
   slug: string;
   title: string;
+  status: string;
   categoryId: string;
   location: string;
   duration: string;
+  tourDate: string;
+  bookingUrl: string;
   difficulty: string;
   bestFor: string;
   bestSeason: string;
@@ -348,6 +365,18 @@ function shopItemToDraft(item?: ShopItem): ShopItemDraft {
   };
 }
 
+function galleryToDraft(item?: GalleryItem): GalleryDraft {
+  return {
+    id: item?.id,
+    slug: item?.slug ?? "",
+    title: item?.title ?? "",
+    image: item?.image ?? "",
+    description: item?.description ?? "",
+    sortOrder: item ? String(item.sortOrder) : "100",
+    isPublished: item?.isPublished === false ? "draft" : "published",
+  };
+}
+
 function blogDateToInput(post?: BlogPost) {
   if (!post?.date) {
     return new Date().toISOString().slice(0, 10);
@@ -378,9 +407,12 @@ function createEmptyTourDraft(categories: ContentCategory[]): TourDraft {
   return {
     slug: "",
     title: "",
+    status: "published",
     categoryId: categories[0] ? String(categories[0].id) : "",
     location: "",
     duration: "",
+    tourDate: "",
+    bookingUrl: "",
     difficulty: "",
     bestFor: "",
     bestSeason: "",
@@ -410,6 +442,7 @@ function tourToDraft(tour: ManagedTour, categories: ContentCategory[]): TourDraf
     id: tour.id,
     slug: tour.slug,
     title: tour.title,
+    status: tour.status ?? "published",
     categoryId:
       tour.categoryId !== undefined
         ? String(tour.categoryId)
@@ -418,6 +451,8 @@ function tourToDraft(tour: ManagedTour, categories: ContentCategory[]): TourDraf
           : "",
     location: tour.location,
     duration: tour.duration,
+    tourDate: tour.tourDate ?? "",
+    bookingUrl: tour.bookingUrl ?? "",
     difficulty: tour.difficulty,
     bestFor: tour.bestFor,
     bestSeason: tour.bestSeason,
@@ -455,10 +490,13 @@ function draftToTourInput(draft: TourDraft): SaveTourInput {
     id: draft.id,
     slug: draft.slug,
     title: draft.title,
+    status: draft.status === "draft" ? "draft" : "published",
     categoryId: draft.categoryId ? Number(draft.categoryId) : undefined,
-    categoryLabel: draft.categoryId ? undefined : (adminTourCategoryPresets.find(c => c.slug === draft.category)?.name ?? draft.category),
+    categoryLabel: undefined,
     location: draft.location,
     duration: draft.duration,
+    tourDate: draft.tourDate.trim() || undefined,
+    bookingUrl: draft.bookingUrl.trim() || undefined,
     difficulty: draft.difficulty,
     bestFor: draft.bestFor,
     bestSeason: draft.bestSeason,
@@ -480,8 +518,24 @@ function draftToTourInput(draft: TourDraft): SaveTourInput {
   };
 }
 
+function createHiddenLegacyTourInput(
+  tour: ManagedTour,
+  categories: ContentCategory[],
+): SaveTourInput {
+  const draft = tourToDraft(tour, categories);
+  const payload = draftToTourInput({
+    ...draft,
+    status: "draft",
+  });
+
+  return {
+    ...payload,
+    categoryLabel: tour.category,
+  };
+}
+
 function AdminDashboard() {
-  const { admin, tours, blogPosts, testimonials, teamMembers, shopItems, categories, databaseAvailable } =
+  const { admin, tours, blogPosts, testimonials, teamMembers, shopItems, galleryItems, categories, databaseAvailable } =
     Route.useLoaderData();
   const router = useRouter();
   const navigate = useNavigate();
@@ -496,6 +550,8 @@ function AdminDashboard() {
   const legacyTeamMembers = teamMembers.filter((item) => item.source !== "database");
   const editableShopItems = shopItems.filter((item) => item.source === "database");
   const legacyShopItems = shopItems.filter((item) => item.source !== "database");
+  const editableGalleryItems = galleryItems.filter((item) => item.source === "database");
+  const legacyGalleryItems = galleryItems.filter((item) => item.source !== "database");
   const adminCategories = categories.filter((category) => category.id > 0);
   const presetCategories: CategoryPresetCard[] = adminTourCategoryPresets.map((preset) => {
     const matchingCategory = adminCategories.find((category) => category.slug === preset.slug);
@@ -540,6 +596,7 @@ function AdminDashboard() {
     teamMemberToDraft(),
   );
   const [shopDraft, setShopDraft] = useState<ShopItemDraft>(() => shopItemToDraft());
+  const [galleryDraft, setGalleryDraft] = useState<GalleryDraft>(() => galleryToDraft());
   const [blogDraft, setBlogDraft] = useState<BlogDraft>(() => blogToDraft());
 
   const sidebarItems: Array<{
@@ -562,6 +619,13 @@ function AdminDashboard() {
       icon: Map,
       count: `${editableTours.length}`,
       note: `${legacyTours.length} legacy still visible`,
+    },
+    {
+      id: "gallery",
+      label: "Gallery",
+      icon: ImagePlus,
+      count: `${editableGalleryItems.length}`,
+      note: `${legacyGalleryItems.length} legacy still visible`,
     },
     {
       id: "testimonials",
@@ -750,6 +814,7 @@ function AdminDashboard() {
               </h1>
               <p className="mt-3 text-sm text-white/50 md:text-base">
                 Tours: {editableTours.length} | Categories: {adminCategories.length} |
+                Gallery: {editableGalleryItems.length} |
                 Testimonials: {editableTestimonials.length} | Team: {editableTeamMembers.length} |
                 Shop: {editableShopItems.length} | Blogs: {editableBlogs.length}
               </p>
@@ -1012,35 +1077,52 @@ function AdminDashboard() {
                 <RecordCard
                   key={`${tour.source}-${tour.slug}`}
                   title={tour.title}
-                  meta={`${tour.category} - ${tour.location}`}
+                  meta={[
+                    tour.status === "draft" ? "Draft" : "Published",
+                    tour.category,
+                    tour.location,
+                    tour.tourDate ? `Date: ${tour.tourDate}` : undefined,
+                  ]
+                    .filter(Boolean)
+                    .join(" - ")}
                   source={tour.source}
                   description={tour.short}
                   actions={
-                    tour.id ? (
-                      <div className="flex gap-2">
-                        <SmallButton
-                          label="Edit"
-                          icon={PencilLine}
-                          onClick={() => setTourDraft(tourToDraft(tour, adminCategories))}
-                        />
-                        <DangerButton
-                          label="Delete"
-                          icon={Trash2}
-                          onClick={() => {
-                            if (!window.confirm(`Delete the tour "${tour.title}"?`)) {
-                              return;
-                            }
+                    <div className="flex gap-2">
+                      <SmallButton
+                        label="Edit"
+                        icon={PencilLine}
+                        onClick={() => setTourDraft(tourToDraft(tour, adminCategories))}
+                      />
+                      <DangerButton
+                        label="Delete"
+                        icon={Trash2}
+                        onClick={() => {
+                          const confirmText = tour.id
+                            ? `Delete the tour "${tour.title}"?`
+                            : `Delete "${tour.title}" from live tours? This will move it to draft.`;
 
+                          if (!window.confirm(confirmText)) {
+                            return;
+                          }
+
+                          if (tour.id) {
                             void runTask("delete-tour", "Tour deleted.", async () => {
-                              await deleteTour({ data: { id: tour.id! } });
+                              await deleteTour({ data: { id: tour.id } });
                               setTourDraft(createEmptyTourDraft(adminCategories));
                             });
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <LegacyNote text="Legacy frontend tour. Reuse this slug in the form to override it from the database." />
-                    )
+                            return;
+                          }
+
+                          void runTask("delete-tour", "Legacy tour moved to draft.", async () => {
+                            await saveTour({
+                              data: createHiddenLegacyTourInput(tour, adminCategories),
+                            });
+                            setTourDraft(createEmptyTourDraft(adminCategories));
+                          });
+                        }}
+                      />
+                    </div>
                   }
                 />
               ))}
@@ -1076,6 +1158,16 @@ function AdminDashboard() {
                   placeholder="optional-auto-generated"
                 />
                 <SelectField
+                  label="Status"
+                  value={tourDraft.status}
+                  onChange={(value) => setTourDraft((prev) => ({ ...prev, status: value }))}
+                  options={[
+                    { value: "published", label: "Published" },
+                    { value: "draft", label: "Draft (hidden from website)" },
+                  ]}
+                  required
+                />
+                <SelectField
                   label="Category"
                   value={tourDraft.categoryId}
                   onChange={(value) => setTourDraft((prev) => ({ ...prev, categoryId: value }))}
@@ -1091,6 +1183,18 @@ function AdminDashboard() {
                   label="Duration"
                   value={tourDraft.duration}
                   onChange={(value) => setTourDraft((prev) => ({ ...prev, duration: value }))}
+                />
+                <Field
+                  label="Tour Date"
+                  type="date"
+                  value={tourDraft.tourDate}
+                  onChange={(value) => setTourDraft((prev) => ({ ...prev, tourDate: value }))}
+                />
+                <Field
+                  label="Book Now Link"
+                  value={tourDraft.bookingUrl}
+                  onChange={(value) => setTourDraft((prev) => ({ ...prev, bookingUrl: value }))}
+                  placeholder="https://rzp.io/...."
                 />
                 <Field
                   label="Difficulty"
@@ -1417,6 +1521,133 @@ function AdminDashboard() {
                 label={tourDraft.id ? "Update tour" : "Create tour"}
               />
             </form>
+              </SectionCard>
+            )}
+
+            {activeSection === "gallery" && (
+              <SectionCard
+                id="gallery"
+                title="Gallery"
+                subtitle="Manage photos for the Gallery page. Draft items stay hidden from public view."
+              >
+                <div className="grid gap-8 xl:grid-cols-[0.95fr_1.05fr]">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {galleryItems.map((item) => (
+                      <RecordCard
+                        key={`${item.source}-${item.slug}`}
+                        title={item.title}
+                        meta={`${item.isPublished ? "Published" : "Draft"} - Order ${item.sortOrder}`}
+                        source={item.source}
+                        description={item.description || "No description added yet."}
+                        actions={
+                          item.id ? (
+                            <div className="flex gap-2">
+                              <SmallButton
+                                label="Edit"
+                                icon={PencilLine}
+                                onClick={() => setGalleryDraft(galleryToDraft(item))}
+                              />
+                              <DangerButton
+                                label="Delete"
+                                icon={Trash2}
+                                onClick={() => {
+                                  if (!window.confirm(`Delete the gallery item "${item.title}"?`)) {
+                                    return;
+                                  }
+
+                                  void runTask("delete-gallery-item", "Gallery item deleted.", async () => {
+                                    await deleteGalleryItem({ data: { id: item.id! } });
+                                    setGalleryDraft(galleryToDraft());
+                                  });
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <LegacyNote text="Legacy gallery item. Use the same slug to override it from admin." />
+                          )
+                        }
+                      />
+                    ))}
+                  </div>
+
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void runTask("save-gallery-item", "Gallery item saved.", async () => {
+                        const payload: SaveGalleryItemInput = {
+                          id: galleryDraft.id,
+                          slug: galleryDraft.slug,
+                          title: galleryDraft.title,
+                          image: galleryDraft.image,
+                          description: galleryDraft.description,
+                          sortOrder: Number(galleryDraft.sortOrder || "100"),
+                          isPublished: galleryDraft.isPublished !== "draft",
+                        };
+                        await saveGalleryItem({ data: payload });
+                        setGalleryDraft(galleryToDraft());
+                      });
+                    }}
+                    className={darkPanelClass}
+                  >
+                    <FormHeader
+                      title={galleryDraft.id ? "Edit gallery item" : "Add gallery item"}
+                      description="Published items appear on the Gallery page. Draft items are saved for later."
+                      onReset={() => setGalleryDraft(galleryToDraft())}
+                    />
+                    <div className="mt-6 grid gap-4 md:grid-cols-2">
+                      <Field
+                        label="Title"
+                        value={galleryDraft.title}
+                        onChange={(value) => setGalleryDraft((prev) => ({ ...prev, title: value }))}
+                        required
+                      />
+                      <Field
+                        label="Slug"
+                        value={galleryDraft.slug}
+                        onChange={(value) => setGalleryDraft((prev) => ({ ...prev, slug: value }))}
+                        placeholder="optional-auto-generated"
+                      />
+                      <Field
+                        label="Sort Order"
+                        type="number"
+                        value={galleryDraft.sortOrder}
+                        onChange={(value) => setGalleryDraft((prev) => ({ ...prev, sortOrder: value }))}
+                      />
+                      <SelectField
+                        label="Status"
+                        value={galleryDraft.isPublished}
+                        onChange={(value) => setGalleryDraft((prev) => ({ ...prev, isPublished: value }))}
+                        options={[
+                          { value: "published", label: "Published" },
+                          { value: "draft", label: "Draft (hidden from website)" },
+                        ]}
+                        required
+                      />
+                    </div>
+                    <div className="mt-4">
+                      <SingleImagePicker
+                        label="Gallery Image"
+                        value={galleryDraft.image}
+                        onChange={(value) => setGalleryDraft((prev) => ({ ...prev, image: value }))}
+                        uploadLabel="Choose gallery image"
+                        urlPlaceholder="https://example.com/heritage-photo.jpg"
+                        helper="Upload or provide a hosted URL for this gallery image."
+                      />
+                    </div>
+                    <div className="mt-4">
+                      <TextAreaField
+                        label="Description"
+                        value={galleryDraft.description}
+                        onChange={(value) => setGalleryDraft((prev) => ({ ...prev, description: value }))}
+                        rows={5}
+                      />
+                    </div>
+                    <SubmitButton
+                      busy={busyKey === "save-gallery-item"}
+                      label={galleryDraft.id ? "Update gallery item" : "Create gallery item"}
+                    />
+                  </form>
+                </div>
               </SectionCard>
             )}
 
@@ -2248,7 +2479,7 @@ function SelectField({
         required={required}
         className={multilineInputClass}
       >
-        <option value="">Select category</option>
+        <option value="">Select option</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

@@ -10,8 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UpcomingRouteImport } from './routes/upcoming'
+import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
 import { Route as StoriesRouteImport } from './routes/stories'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as GeneralFaqsRouteImport } from './routes/general-faqs'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
@@ -29,6 +32,11 @@ const UpcomingRoute = UpcomingRouteImport.update({
   path: '/upcoming',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
+  id: '/terms-and-conditions',
+  path: '/terms-and-conditions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StoriesRoute = StoriesRouteImport.update({
   id: '/stories',
   path: '/stories',
@@ -37,6 +45,16 @@ const StoriesRoute = StoriesRouteImport.update({
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GeneralFaqsRoute = GeneralFaqsRouteImport.update({
+  id: '/general-faqs',
+  path: '/general-faqs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GalleryRoute = GalleryRouteImport.update({
@@ -101,8 +119,11 @@ export interface FileRoutesByFullPath {
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/general-faqs': typeof GeneralFaqsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/upcoming': typeof UpcomingRoute
   '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -117,8 +138,11 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/general-faqs': typeof GeneralFaqsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/upcoming': typeof UpcomingRoute
   '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -134,8 +158,11 @@ export interface FileRoutesById {
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/general-faqs': typeof GeneralFaqsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/upcoming': typeof UpcomingRoute
   '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -152,8 +179,11 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/gallery'
+    | '/general-faqs'
+    | '/privacy-policy'
     | '/shop'
     | '/stories'
+    | '/terms-and-conditions'
     | '/upcoming'
     | '/admin/login'
     | '/blog/$slug'
@@ -168,8 +198,11 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/gallery'
+    | '/general-faqs'
+    | '/privacy-policy'
     | '/shop'
     | '/stories'
+    | '/terms-and-conditions'
     | '/upcoming'
     | '/admin/login'
     | '/blog/$slug'
@@ -184,8 +217,11 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/gallery'
+    | '/general-faqs'
+    | '/privacy-policy'
     | '/shop'
     | '/stories'
+    | '/terms-and-conditions'
     | '/upcoming'
     | '/admin/login'
     | '/blog/$slug'
@@ -201,8 +237,11 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRouteWithChildren
   ContactRoute: typeof ContactRoute
   GalleryRoute: typeof GalleryRoute
+  GeneralFaqsRoute: typeof GeneralFaqsRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ShopRoute: typeof ShopRoute
   StoriesRoute: typeof StoriesRoute
+  TermsAndConditionsRoute: typeof TermsAndConditionsRoute
   UpcomingRoute: typeof UpcomingRoute
   AdminLoginRoute: typeof AdminLoginRoute
   ToursSlugRoute: typeof ToursSlugRouteWithChildren
@@ -219,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UpcomingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms-and-conditions': {
+      id: '/terms-and-conditions'
+      path: '/terms-and-conditions'
+      fullPath: '/terms-and-conditions'
+      preLoaderRoute: typeof TermsAndConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stories': {
       id: '/stories'
       path: '/stories'
@@ -231,6 +277,20 @@ declare module '@tanstack/react-router' {
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/general-faqs': {
+      id: '/general-faqs'
+      path: '/general-faqs'
+      fullPath: '/general-faqs'
+      preLoaderRoute: typeof GeneralFaqsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gallery': {
@@ -341,8 +401,11 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRouteWithChildren,
   ContactRoute: ContactRoute,
   GalleryRoute: GalleryRoute,
+  GeneralFaqsRoute: GeneralFaqsRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
   ShopRoute: ShopRoute,
   StoriesRoute: StoriesRoute,
+  TermsAndConditionsRoute: TermsAndConditionsRoute,
   UpcomingRoute: UpcomingRoute,
   AdminLoginRoute: AdminLoginRoute,
   ToursSlugRoute: ToursSlugRouteWithChildren,

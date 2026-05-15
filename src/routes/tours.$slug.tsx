@@ -6,6 +6,7 @@ import { Breadcrumb } from "@/components/site/Breadcrumb";
 import { TourCard } from "@/components/site/TourCard";
 import { WhatsAppIcon } from "@/components/site/WhatsAppIcon";
 import { createWhatsAppUrl } from "@/data/siteContact";
+import { isExternalLink, resolveTourBookingHref } from "@/lib/booking";
 import { getPublicSiteContent } from "@/lib/content.functions";
 import { buildTourPagePath, toAbsoluteSiteUrl } from "@/lib/site-url";
 import { getTourDisplayImage, getTourShareImageUrl } from "@/lib/tour-images";
@@ -77,6 +78,8 @@ export const Route = createFileRoute("/tours/$slug")({
 function TourDetail() {
   const { tour, tours } = Route.useLoaderData();
   const heroImage = getTourDisplayImage(tour);
+  const bookNowHref = resolveTourBookingHref(tour);
+  const bookNowIsExternal = isExternalLink(bookNowHref);
   const related = tours
     .filter((t) => t.slug !== tour.slug && t.category === tour.category)
     .slice(0, 3);
@@ -116,6 +119,23 @@ function TourDetail() {
             ))}
           </div>
           <div className="flex flex-wrap gap-3">
+            {bookNowIsExternal ? (
+              <a
+                href={bookNowHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-full bg-gold px-5 py-3 text-sm font-medium text-gold-foreground shadow-[var(--shadow-gold)]"
+              >
+                Book Now
+              </a>
+            ) : (
+              <Link
+                to={bookNowHref}
+                className="inline-flex items-center rounded-full bg-gold px-5 py-3 text-sm font-medium text-gold-foreground shadow-[var(--shadow-gold)]"
+              >
+                Book Now
+              </Link>
+            )}
             <Link
               to="/contact"
               className="inline-flex items-center rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground shadow-[var(--shadow-soft)]"
@@ -272,9 +292,26 @@ function TourDetail() {
           <div className="site-card rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-soft)]">
             <p className="text-xs uppercase tracking-[0.2em] text-gold">Starting From</p>
             <p className="mt-1 font-serif text-3xl text-primary">{tour.price}</p>
+            {bookNowIsExternal ? (
+              <a
+                href={bookNowHref}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-5 block rounded-full bg-gold px-5 py-3 text-center text-sm font-medium text-gold-foreground shadow-[var(--shadow-gold)]"
+              >
+                Book Now
+              </a>
+            ) : (
+              <Link
+                to={bookNowHref}
+                className="mt-5 block rounded-full bg-gold px-5 py-3 text-center text-sm font-medium text-gold-foreground shadow-[var(--shadow-gold)]"
+              >
+                Book Now
+              </Link>
+            )}
             <Link
               to="/contact"
-              className="mt-5 block rounded-full bg-primary px-5 py-3 text-center text-sm font-medium text-primary-foreground"
+              className="mt-3 block rounded-full bg-primary px-5 py-3 text-center text-sm font-medium text-primary-foreground"
             >
               Send Enquiry
             </Link>

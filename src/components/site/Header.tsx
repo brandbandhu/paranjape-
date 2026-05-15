@@ -9,6 +9,7 @@ const linksBeforeTours = [
 ];
 
 const linksAfterTours = [
+  { to: "/gallery", label: "Gallery" },
   { to: "/shop", label: "Shop" },
   { to: "/blog", label: "Blog" },
   { to: "/contact", label: "Contact" },

@@ -6,9 +6,9 @@ import { tourListingFilters } from "@/data/tourFilters";
 import { WhatsAppIcon } from "./WhatsAppIcon";
 
 const socialLinks = [
-  { icon: Instagram, href: "#", label: "Instagram" },
+  { icon: Instagram, href: "https://www.instagram.com/firasti_heritage/", label: "Instagram" },
   { icon: Facebook, href: "https://www.facebook.com/peshwehistory/", label: "Facebook" },
-  { icon: Youtube, href: "#", label: "YouTube" },
+  { icon: Youtube, href: "https://www.youtube.com/@CAShantanuParanjape", label: "YouTube" },
 ] as const;
 
 const footerTourCategories = tourListingFilters.filter((filter) => filter.value !== "all");
@@ -47,9 +47,13 @@ export function Footer() {
               ["Home", "/"],
               ["About", "/about"],
               ["Tours", "/tours"],
+              ["Gallery", "/gallery"],
               ["Shop", "/shop"],
               ["Blog", "/blog"],
               ["Contact", "/contact"],
+              ["Privacy Policy", "/privacy-policy"],
+              ["Terms and Conditions", "/terms-and-conditions"],
+              ["General FAQs", "/general-faqs"],
             ].map(([label, to]) => (
               <li key={to}>
                 <Link to={to as string} className="text-foreground/85 transition-colors hover:text-primary">

@@ -4,8 +4,16 @@ import heroWalk from "@/assets/hero-walk.jpg";
 import shaniwar from "@/assets/tour-shaniwar.jpg";
 import sinhagad from "@/assets/tour-sinhagad.jpg";
 import shivneri from "@/assets/tour-shivneri.jpg";
+import shaniwarFront from "@/assets/gallery/shaniwar-front.jpg";
+import sinhagadView from "@/assets/gallery/sinhagad-view.jpg";
+import shivneriMain from "@/assets/gallery/shivneri-main.jpg";
+import parvatiHill from "@/assets/gallery/parvati-hill.jpg";
+import kondaneChaitya from "@/assets/gallery/kondane-chaitya.jpg";
+import gondeshwarComplex from "@/assets/gallery/gondeshwar-complex.jpg";
+import hampiVitthala from "@/assets/gallery/hampi-vitthala.jpg";
+import varanasiMunshiGhat from "@/assets/gallery/varanasi-munshi-ghat.jpg";
 import { defaultTeamMembers } from "@/data/teamMembers";
-import type { ShopItem, TeamMember, Testimonial } from "@/lib/content.types";
+import type { GalleryItem, ShopItem, TeamMember, Testimonial } from "@/lib/content.types";
 
 export const staticTestimonials: Testimonial[] = [
   {
@@ -98,6 +106,81 @@ export const staticShopItems: ShopItem[] = [
     title: "Curated Heritage Gift Hamper",
     price: "From Rs. 1,499",
     description: "Made-to-order hampers for institutions, family celebrations and hosted groups.",
+    source: "static",
+  },
+];
+
+export const staticGalleryItems: GalleryItem[] = [
+  {
+    slug: "shaniwar-wada-night-view",
+    title: "Shaniwar Wada at Dusk",
+    image: shaniwarFront,
+    description: "An evening frame of Pune's iconic Peshwa-era fortification.",
+    sortOrder: 10,
+    isPublished: true,
+    source: "static",
+  },
+  {
+    slug: "sinhagad-ridge-view",
+    title: "Sinhagad Ridge View",
+    image: sinhagadView,
+    description: "A sweeping Sahyadri view from the Sinhagad fort walls.",
+    sortOrder: 20,
+    isPublished: true,
+    source: "static",
+  },
+  {
+    slug: "shivneri-main-approach",
+    title: "Shivneri Main Approach",
+    image: shivneriMain,
+    description: "The historic approach inside Shivneri, birthplace of Chhatrapati Shivaji Maharaj.",
+    sortOrder: 30,
+    isPublished: true,
+    source: "static",
+  },
+  {
+    slug: "parvati-hill-complex",
+    title: "Parvati Hill Complex",
+    image: parvatiHill,
+    description: "Temple silhouettes and city-facing heights of Parvati.",
+    sortOrder: 40,
+    isPublished: true,
+    source: "static",
+  },
+  {
+    slug: "kondane-chaitya-detail",
+    title: "Kondane Chaitya Detail",
+    image: kondaneChaitya,
+    description: "Rock-cut forms that preserve early Buddhist architectural memory.",
+    sortOrder: 50,
+    isPublished: true,
+    source: "static",
+  },
+  {
+    slug: "gondeshwar-complex-panorama",
+    title: "Gondeshwar Panorama",
+    image: gondeshwarComplex,
+    description: "A wide architectural look at the Hemadpanthi Gondeshwar complex.",
+    sortOrder: 60,
+    isPublished: true,
+    source: "static",
+  },
+  {
+    slug: "hampi-vitthala-corridor",
+    title: "Hampi Vitthala Corridor",
+    image: hampiVitthala,
+    description: "Stone pavilions and rhythm at the Vitthala Temple complex, Hampi.",
+    sortOrder: 70,
+    isPublished: true,
+    source: "static",
+  },
+  {
+    slug: "varanasi-ghat-life",
+    title: "Varanasi Ghat Life",
+    image: varanasiMunshiGhat,
+    description: "Boats, light, and devotional movement along the riverfront in Varanasi.",
+    sortOrder: 80,
+    isPublished: true,
     source: "static",
   },
 ];
