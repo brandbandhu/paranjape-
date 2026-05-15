@@ -1,5 +1,4 @@
 import { blogImagePaths } from "@/data/blogImagePaths";
-
 export const blogPosts = [
   {
     slug: "hampi-lotus-mahal",

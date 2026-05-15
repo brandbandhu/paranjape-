@@ -3,6 +3,7 @@ import { Calendar, MapPin, Users } from "lucide-react";
 import { Layout } from "@/components/site/Layout";
 import { PageBanner } from "@/components/site/PageBanner";
 import { upcomingTours } from "@/data/tours";
+import { isExternalLink, resolveTourBookingHref } from "@/lib/booking";
 import { getPublicSiteContent } from "@/lib/content.functions";
 import heroTemple from "@/assets/hero-temple.jpg";
 
@@ -52,7 +53,23 @@ function Upcoming() {
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Link to="/tours/$slug" params={{ slug: it.tour.slug }} className="site-card-link inline-flex rounded-full border border-border px-4 py-2 text-xs hover:border-primary hover:text-primary transition-colors">View Tour</Link>
-                    <Link to="/contact" className="inline-flex rounded-full bg-primary text-primary-foreground px-4 py-2 text-xs">Book / Enquire</Link>
+                    {isExternalLink(resolveTourBookingHref(it.tour)) ? (
+                      <a
+                        href={resolveTourBookingHref(it.tour)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex rounded-full bg-primary px-4 py-2 text-xs text-primary-foreground"
+                      >
+                        Book Now
+                      </a>
+                    ) : (
+                      <Link
+                        to={resolveTourBookingHref(it.tour)}
+                        className="inline-flex rounded-full bg-primary px-4 py-2 text-xs text-primary-foreground"
+                      >
+                        Book Now
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

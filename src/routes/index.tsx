@@ -16,8 +16,8 @@ import { getPublicSiteContent } from "@/lib/content.functions";
 import { resolveBlogImage } from "@/lib/blog-images";
 import type { Testimonial } from "@/lib/content.types";
 import { WhatsAppIcon } from "@/components/site/WhatsAppIcon";
+import { createWhatsAppUrl } from "@/data/siteContact";
 import { TourCard } from "@/components/site/TourCard";
-import { tours as staticTours } from "@/data/tours";
 import heroTemple from "@/assets/hero-temple.jpg";
 import hampiVitthala from "@/assets/gallery/hampi-vitthala.jpg";
 import pattadakalTemple from "@/assets/gallery/pattadakal-temple.jpg";
@@ -106,15 +106,6 @@ const whyUs = [
   },
 ];
 
-const featuredTours = [
-  { slug: "shaniwar-wada-heritage-walk", tagLabel: "Heritage Walk" },
-  { slug: "shivneri-fort-tour", tagLabel: "Fort Tour" },
-  { slug: "kondane-caves-exploration", tagLabel: "Ancient Caves Tour" },
-  { slug: "gondeshwar-temple-architecture-tour", tagLabel: "Temple & Architecture" },
-  { slug: "hampi-badami-heritage-trip", tagLabel: "Multiple Day Tour" },
-  { slug: "ayodhya-varanasi-prayagraj-tour", tagLabel: "Multiple Day Tour" },
-] as const;
-
 const landmarkGallerySources = {
   khajuraho: "https://commons.wikimedia.org/wiki/Special:FilePath/Khajuraho%20Temples.JPG",
   belur: "https://commons.wikimedia.org/wiki/Special:FilePath/BELUR%2C%20TEMPLE.jpg",
@@ -163,41 +154,7 @@ const homeGallery = [
 ] as const;
 
 function getFeaturedTours(tours: ReturnType<typeof Route.useLoaderData>["tours"]) {
-  const allTours = [...tours];
-
-  for (const staticTour of staticTours) {
-    if (!allTours.find((tour) => tour.slug === staticTour.slug)) {
-      allTours.push(staticTour as (typeof tours)[number]);
-    }
-  }
-
-  const selected: { tour: (typeof tours)[number]; tagLabel: string }[] = [];
-  const usedSlugs = new Set<string>();
-
-  for (const featured of featuredTours) {
-    const match = allTours.find((tour) => tour.slug === featured.slug);
-    if (!match || usedSlugs.has(match.slug)) {
-      continue;
-    }
-
-    selected.push({ tour: match, tagLabel: featured.tagLabel });
-    usedSlugs.add(match.slug);
-  }
-
-  for (const tour of allTours) {
-    if (selected.length >= 6) {
-      break;
-    }
-
-    if (usedSlugs.has(tour.slug)) {
-      continue;
-    }
-
-    selected.push({ tour, tagLabel: tour.category });
-    usedSlugs.add(tour.slug);
-  }
-
-  return selected.slice(0, 6);
+  return tours.slice(0, 6).map((tour) => ({ tour, tagLabel: tour.category }));
 }
 
 function Home() {
@@ -442,7 +399,9 @@ function Home() {
               </div>
               <div className="flex flex-wrap gap-3">
                 <a
-                  href="https://wa.me/910000000000"
+                  href={createWhatsAppUrl(
+                    "Hello Paranjape Tours, I would like to enquire about a heritage tour.",
+                  )}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 rounded-full bg-whatsapp px-6 py-3 text-sm font-semibold text-white shadow-[var(--shadow-elegant)]"

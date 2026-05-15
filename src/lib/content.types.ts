@@ -39,6 +39,15 @@ export type Testimonial = {
   source?: "database" | "static";
 };
 
+export type TeamMember = {
+  id?: number;
+  slug: string;
+  name: string;
+  role: string;
+  description: string;
+  source?: "database" | "static";
+};
+
 export type ShopItem = {
   id?: number;
   slug: string;
@@ -52,6 +61,17 @@ export type ShopItem = {
   source?: "database" | "static";
 };
 
+export type GalleryItem = {
+  id?: number;
+  slug: string;
+  title: string;
+  image: string;
+  description: string;
+  sortOrder: number;
+  isPublished: boolean;
+  source?: "database" | "static";
+};
+
 export type AdminUser = {
   id: number;
   username: string;
@@ -62,7 +82,9 @@ export type PublicSiteContent = {
   tours: ManagedTour[];
   blogPosts: BlogPost[];
   testimonials: Testimonial[];
+  teamMembers: TeamMember[];
   shopItems: ShopItem[];
+  galleryItems: GalleryItem[];
   categories: ContentCategory[];
   databaseAvailable: boolean;
 };

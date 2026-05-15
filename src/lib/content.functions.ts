@@ -5,8 +5,10 @@ import { loginWithCredentials, logoutCurrentAdmin, requireAdmin } from "@/lib/au
 import {
   deleteBlogPostById,
   deleteCategoryById,
+  deleteGalleryItemById,
   hideLegacyContent,
   deleteShopItemById,
+  deleteTeamMemberById,
   deleteTestimonialById,
   deleteTourById,
   fetchAdminDashboardData,
@@ -14,13 +16,17 @@ import {
   type LegacyContentType,
   type SaveBlogPostInput,
   type SaveCategoryInput,
+  type SaveGalleryItemInput,
   type SaveShopItemInput,
+  type SaveTeamMemberInput,
   type SaveTestimonialInput,
   type SaveTourInput,
   submitPublicContactEnquiry,
   upsertBlogPost,
   upsertCategory,
+  upsertGalleryItem,
   upsertShopItem,
+  upsertTeamMember,
   upsertTestimonial,
   upsertTour,
 } from "@/lib/content.server";
@@ -97,6 +103,20 @@ export const deleteTestimonial = createServerFn({ method: "POST" })
     return { success: true };
   });
 
+export const saveTeamMember = createServerFn({ method: "POST" })
+  .inputValidator((data: SaveTeamMemberInput) => data)
+  .handler(async ({ data }) => {
+    await upsertTeamMember(data);
+    return { success: true };
+  });
+
+export const deleteTeamMember = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: number }) => data)
+  .handler(async ({ data }) => {
+    await deleteTeamMemberById(data.id);
+    return { success: true };
+  });
+
 export const saveShopItem = createServerFn({ method: "POST" })
   .inputValidator((data: SaveShopItemInput) => data)
   .handler(async ({ data }) => {
@@ -108,6 +128,20 @@ export const deleteShopItem = createServerFn({ method: "POST" })
   .inputValidator((data: { id: number }) => data)
   .handler(async ({ data }) => {
     await deleteShopItemById(data.id);
+    return { success: true };
+  });
+
+export const saveGalleryItem = createServerFn({ method: "POST" })
+  .inputValidator((data: SaveGalleryItemInput) => data)
+  .handler(async ({ data }) => {
+    await upsertGalleryItem(data);
+    return { success: true };
+  });
+
+export const deleteGalleryItem = createServerFn({ method: "POST" })
+  .inputValidator((data: { id: number }) => data)
+  .handler(async ({ data }) => {
+    await deleteGalleryItemById(data.id);
     return { success: true };
   });
 

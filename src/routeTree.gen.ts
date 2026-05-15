@@ -10,8 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UpcomingRouteImport } from './routes/upcoming'
+import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
 import { Route as StoriesRouteImport } from './routes/stories'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as GeneralFaqsRouteImport } from './routes/general-faqs'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
@@ -22,10 +25,16 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ToursSlugRouteImport } from './routes/tours.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
+import { Route as ToursSlugShareImageRouteImport } from './routes/tours.$slug.share-image'
 
 const UpcomingRoute = UpcomingRouteImport.update({
   id: '/upcoming',
   path: '/upcoming',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsAndConditionsRoute = TermsAndConditionsRouteImport.update({
+  id: '/terms-and-conditions',
+  path: '/terms-and-conditions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StoriesRoute = StoriesRouteImport.update({
@@ -36,6 +45,16 @@ const StoriesRoute = StoriesRouteImport.update({
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GeneralFaqsRoute = GeneralFaqsRouteImport.update({
+  id: '/general-faqs',
+  path: '/general-faqs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GalleryRoute = GalleryRouteImport.update({
@@ -79,14 +98,19 @@ const ToursSlugRoute = ToursSlugRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
-  id: '/blog/$slug',
-  path: '/blog/$slug',
-  getParentRoute: () => rootRouteImport,
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ToursSlugShareImageRoute = ToursSlugShareImageRouteImport.update({
+  id: '/share-image',
+  path: '/share-image',
+  getParentRoute: () => ToursSlugRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -94,30 +118,38 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/general-faqs': typeof GeneralFaqsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/upcoming': typeof UpcomingRoute
   '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/tours/$slug': typeof ToursSlugRoute
+  '/tours/$slug': typeof ToursSlugRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/tours/': typeof ToursIndexRoute
+  '/tours/$slug/share-image': typeof ToursSlugShareImageRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/general-faqs': typeof GeneralFaqsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/upcoming': typeof UpcomingRoute
   '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/tours/$slug': typeof ToursSlugRoute
+  '/tours/$slug': typeof ToursSlugRouteWithChildren
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
   '/tours': typeof ToursIndexRoute
+  '/tours/$slug/share-image': typeof ToursSlugShareImageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,15 +157,19 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/gallery': typeof GalleryRoute
+  '/general-faqs': typeof GeneralFaqsRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/shop': typeof ShopRoute
   '/stories': typeof StoriesRoute
+  '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/upcoming': typeof UpcomingRoute
   '/admin/login': typeof AdminLoginRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/tours/$slug': typeof ToursSlugRoute
+  '/tours/$slug': typeof ToursSlugRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/tours/': typeof ToursIndexRoute
+  '/tours/$slug/share-image': typeof ToursSlugShareImageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -142,8 +178,11 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/gallery'
+    | '/general-faqs'
+    | '/privacy-policy'
     | '/shop'
     | '/stories'
+    | '/terms-and-conditions'
     | '/upcoming'
     | '/admin/login'
     | '/blog/$slug'
@@ -151,14 +190,18 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/blog/'
     | '/tours/'
+    | '/tours/$slug/share-image'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/contact'
     | '/gallery'
+    | '/general-faqs'
+    | '/privacy-policy'
     | '/shop'
     | '/stories'
+    | '/terms-and-conditions'
     | '/upcoming'
     | '/admin/login'
     | '/blog/$slug'
@@ -166,14 +209,18 @@ export interface FileRouteTypes {
     | '/admin'
     | '/blog'
     | '/tours'
+    | '/tours/$slug/share-image'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/contact'
     | '/gallery'
+    | '/general-faqs'
+    | '/privacy-policy'
     | '/shop'
     | '/stories'
+    | '/terms-and-conditions'
     | '/upcoming'
     | '/admin/login'
     | '/blog/$slug'
@@ -181,6 +228,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/blog/'
     | '/tours/'
+    | '/tours/$slug/share-image'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -188,12 +236,14 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   GalleryRoute: typeof GalleryRoute
+  GeneralFaqsRoute: typeof GeneralFaqsRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ShopRoute: typeof ShopRoute
   StoriesRoute: typeof StoriesRoute
+  TermsAndConditionsRoute: typeof TermsAndConditionsRoute
   UpcomingRoute: typeof UpcomingRoute
   AdminLoginRoute: typeof AdminLoginRoute
-  BlogSlugRoute: typeof BlogSlugRoute
-  ToursSlugRoute: typeof ToursSlugRoute
+  ToursSlugRoute: typeof ToursSlugRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ToursIndexRoute: typeof ToursIndexRoute
@@ -208,6 +258,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UpcomingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms-and-conditions': {
+      id: '/terms-and-conditions'
+      path: '/terms-and-conditions'
+      fullPath: '/terms-and-conditions'
+      preLoaderRoute: typeof TermsAndConditionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stories': {
       id: '/stories'
       path: '/stories'
@@ -220,6 +277,20 @@ declare module '@tanstack/react-router' {
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/general-faqs': {
+      id: '/general-faqs'
+      path: '/general-faqs'
+      fullPath: '/general-faqs'
+      preLoaderRoute: typeof GeneralFaqsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gallery': {
@@ -280,10 +351,10 @@ declare module '@tanstack/react-router' {
     }
     '/blog/$slug': {
       id: '/blog/$slug'
-      path: '/blog/$slug'
+      path: '/$slug'
       fullPath: '/blog/$slug'
       preLoaderRoute: typeof BlogSlugRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof BlogRoute
     }
     '/admin/login': {
       id: '/admin/login'
@@ -292,20 +363,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tours/$slug/share-image': {
+      id: '/tours/$slug/share-image'
+      path: '/share-image'
+      fullPath: '/tours/$slug/share-image'
+      preLoaderRoute: typeof ToursSlugShareImageRouteImport
+      parentRoute: typeof ToursSlugRoute
+    }
   }
 }
+
+interface ToursSlugRouteChildren {
+  ToursSlugShareImageRoute: typeof ToursSlugShareImageRoute
+}
+
+const ToursSlugRouteChildren: ToursSlugRouteChildren = {
+  ToursSlugShareImageRoute: ToursSlugShareImageRoute,
+}
+
+const ToursSlugRouteWithChildren = ToursSlugRoute._addFileChildren(
+  ToursSlugRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   GalleryRoute: GalleryRoute,
+  GeneralFaqsRoute: GeneralFaqsRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
   ShopRoute: ShopRoute,
   StoriesRoute: StoriesRoute,
+  TermsAndConditionsRoute: TermsAndConditionsRoute,
   UpcomingRoute: UpcomingRoute,
   AdminLoginRoute: AdminLoginRoute,
-  BlogSlugRoute: BlogSlugRoute,
-  ToursSlugRoute: ToursSlugRoute,
+  ToursSlugRoute: ToursSlugRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
   ToursIndexRoute: ToursIndexRoute,

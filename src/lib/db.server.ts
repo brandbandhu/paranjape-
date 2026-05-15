@@ -2,13 +2,14 @@ import mysql from "mysql2/promise";
 import type { Pool } from "mysql2/promise";
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { adminTourCategoryPresets } from "@/data/adminCategories";
+import { defaultTeamMembers } from "@/data/teamMembers";
 
 const DEFAULT_DB_HOST = process.env.MYSQL_HOST ?? "127.0.0.1";
 const DEFAULT_DB_PORT = Number(process.env.MYSQL_PORT ?? "3306");
 const DEFAULT_DB_USER = process.env.MYSQL_USER ?? "root";
 const DEFAULT_DB_PASSWORD = process.env.MYSQL_PASSWORD ?? "root";
 const DEFAULT_DB_NAME = process.env.MYSQL_DATABASE ?? "paranjpe_tours";
-const DB_SCHEMA_VERSION = "paranjpe-cms-v4";
+const DB_SCHEMA_VERSION = "paranjpe-cms-v6";
 
 const SCRYPT_KEY_LENGTH = 64;
 
@@ -65,6 +66,53 @@ async function seedDefaultCategories(pool: Pool) {
   }
 }
 
+async function seedDefaultTeamMembers(pool: Pool) {
+  for (const member of defaultTeamMembers) {
+    await pool.execute(
+      `
+        INSERT IGNORE INTO about_team_members (slug, name, role, description)
+        VALUES (?, ?, ?, ?)
+      `,
+      [member.slug, member.name, member.role, member.description],
+    );
+  }
+}
+
+async function hasTableColumn(pool: Pool, tableName: string, columnName: string) {
+  const [rows] = await pool.query<any[]>(
+    `
+      SELECT 1
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = ?
+        AND COLUMN_NAME = ?
+      LIMIT 1
+    `,
+    [tableName, columnName],
+  );
+
+  return rows.length > 0;
+}
+
+async function ensureCmsToursColumns(pool: Pool) {
+  const hasTourDate = await hasTableColumn(pool, "cms_tours", "tour_date");
+  if (!hasTourDate) {
+    await pool.execute("ALTER TABLE cms_tours ADD COLUMN tour_date DATE NULL AFTER duration");
+  }
+
+  const hasBookingUrl = await hasTableColumn(pool, "cms_tours", "booking_url");
+  if (!hasBookingUrl) {
+    await pool.execute("ALTER TABLE cms_tours ADD COLUMN booking_url LONGTEXT NULL AFTER tour_date");
+  }
+
+  const hasStatus = await hasTableColumn(pool, "cms_tours", "status");
+  if (!hasStatus) {
+    await pool.execute(
+      "ALTER TABLE cms_tours ADD COLUMN status VARCHAR(24) NOT NULL DEFAULT 'published' AFTER booking_url",
+    );
+  }
+}
+
 async function createTables(pool: Pool) {
   await pool.execute(`
     CREATE TABLE IF NOT EXISTS admins (
@@ -111,6 +159,9 @@ async function createTables(pool: Pool) {
       category_label VARCHAR(255) NOT NULL,
       location VARCHAR(255) NOT NULL,
       duration VARCHAR(255) NOT NULL,
+      tour_date DATE NULL,
+      booking_url LONGTEXT NULL,
+      status VARCHAR(24) NOT NULL DEFAULT 'published',
       difficulty VARCHAR(255) NOT NULL,
       best_for VARCHAR(255) NOT NULL,
       best_season VARCHAR(255) NOT NULL,
@@ -144,6 +195,18 @@ async function createTables(pool: Pool) {
       name VARCHAR(255) NOT NULL,
       role VARCHAR(255) NOT NULL,
       text TEXT NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS about_team_members (
+      id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      slug VARCHAR(255) NOT NULL UNIQUE,
+      name VARCHAR(255) NOT NULL,
+      role VARCHAR(255) NOT NULL,
+      description TEXT NOT NULL,
       created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
@@ -216,9 +279,27 @@ async function createTables(pool: Pool) {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
 
+  await pool.execute(`
+    CREATE TABLE IF NOT EXISTS cms_gallery_items (
+      id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      slug VARCHAR(255) NOT NULL UNIQUE,
+      title VARCHAR(255) NOT NULL,
+      image LONGTEXT NOT NULL,
+      description TEXT NOT NULL,
+      sort_order INT NOT NULL DEFAULT 100,
+      is_published TINYINT(1) NOT NULL DEFAULT 1,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      INDEX idx_cms_gallery_items_sort_order (sort_order),
+      INDEX idx_cms_gallery_items_is_published (is_published)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
   await pool.execute("ALTER TABLE cms_tours MODIFY image LONGTEXT NOT NULL");
   await pool.execute("ALTER TABLE shop_items MODIFY image LONGTEXT NOT NULL");
   await pool.execute("ALTER TABLE blogs MODIFY image LONGTEXT NOT NULL");
+  await pool.execute("ALTER TABLE cms_gallery_items MODIFY image LONGTEXT NOT NULL");
+  await ensureCmsToursColumns(pool);
 }
 
 async function createDatabaseIfNeeded() {
@@ -257,6 +338,7 @@ async function initializePool() {
   await createTables(pool);
   await seedDefaultAdmin(pool);
   await seedDefaultCategories(pool);
+  await seedDefaultTeamMembers(pool);
 
   return pool;
 }
@@ -279,6 +361,7 @@ export async function getPool() {
         await createTables(pool);
         await seedDefaultAdmin(pool);
         await seedDefaultCategories(pool);
+        await seedDefaultTeamMembers(pool);
         globalScope.__paranjpeMysqlSchemaVersion = DB_SCHEMA_VERSION;
       })().finally(() => {
         globalScope.__paranjpeMysqlSchemaReady = undefined;

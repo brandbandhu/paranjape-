@@ -6,22 +6,75 @@ import {
   type ContactEnquiryInput,
 } from "@/data/contactEnquiry";
 import { siteContact } from "@/data/siteContact";
-import { staticShopItems, staticTestimonials } from "@/data/staticSiteContent";
+import {
+  staticGalleryItems,
+  staticShopItems,
+  staticTeamMembers,
+  staticTestimonials,
+} from "@/data/staticSiteContent";
 import { requireAdmin } from "@/lib/auth.server";
 import { getPool } from "@/lib/db.server";
 import type {
   AdminDashboardData,
   BlogPost,
   ContentCategory,
+  GalleryItem,
   ManagedTour,
   PublicSiteContent,
   ShopItem,
+  TeamMember,
   Testimonial,
 } from "@/lib/content.types";
 
 type GalleryImage = { src: string; alt: string };
 type TourItinerary = { time: string; title: string; desc: string };
 type TourFaq = { q: string; a: string };
+type FetchContentOptions = {
+  includeDraftTours?: boolean;
+  includeUnpublishedGallery?: boolean;
+};
+
+function normalizeTourStatus(value: unknown): "draft" | "published" {
+  return String(value || "").trim().toLowerCase() === "draft" ? "draft" : "published";
+}
+
+function isPublishedTour(tour: Pick<ManagedTour, "status">) {
+  return normalizeTourStatus(tour.status) === "published";
+}
+
+function toIsoDateString(value: unknown): string | undefined {
+  if (value === null || value === undefined || value === "") {
+    return undefined;
+  }
+
+  if (value instanceof Date) {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, "0");
+    const day = String(value.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  const raw = Buffer.isBuffer(value) ? value.toString("utf8").trim() : String(value).trim();
+  if (!raw) {
+    return undefined;
+  }
+
+  const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (match) {
+    return match[1];
+  }
+
+  const parsedDate = new Date(raw);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return undefined;
+  }
+
+  const year = parsedDate.getFullYear();
+  const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+  const day = String(parsedDate.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export type LegacyContentType = "tour" | "blog" | "testimonial" | "shop";
 
 const legacyContentTypes: LegacyContentType[] = ["tour", "blog", "testimonial", "shop"];
@@ -125,6 +178,9 @@ function mapTourRow(row: any): ManagedTour {
     category: String(row.category_name || row.category_label || ""),
     location: String(row.location || ""),
     duration: String(row.duration || ""),
+    tourDate: toIsoDateString(row.tour_date_value ?? row.tour_date),
+    bookingUrl: String(row.booking_url || "").trim() || undefined,
+    status: normalizeTourStatus(row.status),
     difficulty: String(row.difficulty || ""),
     bestFor: String(row.best_for || ""),
     bestSeason: String(row.best_season || ""),
@@ -175,12 +231,36 @@ function mapShopRow(row: any): ShopItem {
   };
 }
 
+function mapGalleryRow(row: any): GalleryItem {
+  return {
+    id: Number(row.id),
+    slug: String(row.slug || ""),
+    title: String(row.title || ""),
+    image: String(row.image || ""),
+    description: String(row.description || ""),
+    sortOrder: Number(row.sort_order ?? 100),
+    isPublished: Number(row.is_published ?? 1) === 1,
+    source: "database",
+  };
+}
+
 function mapTestimonialRow(row: any): Testimonial {
   return {
     id: Number(row.id),
     name: String(row.name || ""),
     role: String(row.role || ""),
     text: String(row.text || ""),
+    source: "database",
+  };
+}
+
+function mapTeamMemberRow(row: any): TeamMember {
+  return {
+    id: Number(row.id),
+    slug: String(row.slug || ""),
+    name: String(row.name || ""),
+    role: String(row.role || ""),
+    description: String(row.description || ""),
     source: "database",
   };
 }
@@ -193,6 +273,19 @@ function mapCategoryRow(row: any): ContentCategory {
     description: String(row.description || ""),
     source: "database",
   };
+}
+
+function mapStaticTour(tour: (typeof staticTours)[number]): ManagedTour {
+  return {
+    ...tour,
+    status: normalizeTourStatus(tour.status),
+    source: "static" as const,
+  };
+}
+
+function findStaticTourBySlug(slug: string) {
+  const normalizedSlug = slug.trim().toLowerCase();
+  return staticTours.find((tour) => tour.slug.toLowerCase() === normalizedSlug);
 }
 
 function normalizeLegacyKey(value: string) {
@@ -261,11 +354,19 @@ function hideLegacyContentInPool(
   );
 }
 
-export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
+export async function fetchPublicSiteContent(
+  options: FetchContentOptions = {},
+): Promise<PublicSiteContent> {
+  const includeDraftTours = Boolean(options.includeDraftTours);
+  const includeUnpublishedGallery = Boolean(options.includeUnpublishedGallery);
+
   try {
     const pool = await getPool();
     const [tourRows] = await pool.query<any[]>(`
-      SELECT cms_tours.*, categories.name AS category_name
+      SELECT
+        cms_tours.*,
+        DATE_FORMAT(cms_tours.tour_date, '%Y-%m-%d') AS tour_date_value,
+        categories.name AS category_name
       FROM cms_tours
       LEFT JOIN categories ON categories.id = cms_tours.category_id
       ORDER BY cms_tours.updated_at DESC, cms_tours.id DESC
@@ -276,8 +377,14 @@ export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
     const [testimonialRows] = await pool.query<any[]>(
       "SELECT * FROM cms_testimonials ORDER BY updated_at DESC, id DESC",
     );
+    const [teamMemberRows] = await pool.query<any[]>(
+      "SELECT * FROM about_team_members ORDER BY updated_at DESC, id DESC",
+    );
     const [shopRows] = await pool.query<any[]>(
       "SELECT * FROM shop_items ORDER BY updated_at DESC, id DESC",
+    );
+    const [galleryRows] = await pool.query<any[]>(
+      "SELECT * FROM cms_gallery_items ORDER BY sort_order ASC, updated_at DESC, id DESC",
     );
     const [categoryRows] = await pool.query<any[]>(
       "SELECT * FROM categories ORDER BY name ASC",
@@ -289,15 +396,16 @@ export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
     const databaseTours = tourRows.map(mapTourRow);
     const databaseBlogs = blogRows.map(mapBlogRow);
     const databaseTestimonials = testimonialRows.map(mapTestimonialRow);
+    const databaseTeamMembers = teamMemberRows.map(mapTeamMemberRow);
     const databaseShopItems = shopRows.map(mapShopRow);
+    const databaseGalleryItems = galleryRows.map(mapGalleryRow);
     const databaseCategories = categoryRows.map(mapCategoryRow);
     const staticCategories = buildStaticCategories();
     const hiddenLegacyItems = mapHiddenLegacyRows(legacyVisibilityRows);
     const visibleStaticTours = staticTours
       .map((tour) => ({
-        ...tour,
+        ...mapStaticTour(tour),
         legacyKey: getLegacyTourKey(tour),
-        source: "static" as const,
       }))
       .filter((tour) => !hiddenLegacyItems.tour.has(tour.legacyKey));
     const visibleStaticBlogs = staticBlogPosts
@@ -319,37 +427,52 @@ export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
         legacyKey: getLegacyShopKey(item),
       }))
       .filter((item) => !hiddenLegacyItems.shop.has(item.legacyKey));
+    const mergedTours = mergeBySlug(databaseTours, visibleStaticTours);
+    const mergedGalleryItems = mergeBySlug(databaseGalleryItems, staticGalleryItems);
 
     return {
-      tours: mergeBySlug(databaseTours, visibleStaticTours),
+      tours: includeDraftTours ? mergedTours : mergedTours.filter(isPublishedTour),
       blogPosts: mergeBySlug(databaseBlogs, visibleStaticBlogs),
       testimonials: [...databaseTestimonials, ...visibleStaticTestimonials],
+      teamMembers: mergeBySlug(databaseTeamMembers, staticTeamMembers),
       shopItems: mergeBySlug(databaseShopItems, visibleStaticShopItems),
+      galleryItems: includeUnpublishedGallery
+        ? mergedGalleryItems
+        : mergedGalleryItems.filter((item) => item.isPublished),
       categories: mergeBySlug(databaseCategories, staticCategories),
       databaseAvailable: true,
     };
   } catch (error) {
     console.error("Unable to load MySQL content, falling back to static content.", error);
+    const staticToursWithSource = staticTours.map((tour) => ({
+      ...mapStaticTour(tour),
+      legacyKey: getLegacyTourKey(tour),
+    }));
+    const staticBlogsWithSource = staticBlogPosts.map((post) => ({
+      ...post,
+      legacyKey: getLegacyBlogKey(post),
+      source: "static" as const,
+    }));
+    const staticTestimonialsWithLegacy = staticTestimonials.map((item) => ({
+      ...item,
+      legacyKey: getLegacyTestimonialKey(item),
+    }));
+    const staticShopItemsWithLegacy = staticShopItems.map((item) => ({
+      ...item,
+      legacyKey: getLegacyShopKey(item),
+    }));
 
     return {
-      tours: staticTours.map((tour) => ({
-        ...tour,
-        legacyKey: getLegacyTourKey(tour),
-        source: "static" as const,
-      })),
-      blogPosts: staticBlogPosts.map((post) => ({
-        ...post,
-        legacyKey: getLegacyBlogKey(post),
-        source: "static" as const,
-      })),
-      testimonials: staticTestimonials.map((item) => ({
-        ...item,
-        legacyKey: getLegacyTestimonialKey(item),
-      })),
-      shopItems: staticShopItems.map((item) => ({
-        ...item,
-        legacyKey: getLegacyShopKey(item),
-      })),
+      tours: includeDraftTours
+        ? staticToursWithSource
+        : staticToursWithSource.filter(isPublishedTour),
+      blogPosts: staticBlogsWithSource,
+      testimonials: staticTestimonialsWithLegacy,
+      teamMembers: staticTeamMembers,
+      shopItems: staticShopItemsWithLegacy,
+      galleryItems: includeUnpublishedGallery
+        ? staticGalleryItems
+        : staticGalleryItems.filter((item) => item.isPublished),
       categories: buildStaticCategories(),
       databaseAvailable: false,
     };
@@ -358,7 +481,10 @@ export async function fetchPublicSiteContent(): Promise<PublicSiteContent> {
 
 export async function fetchAdminDashboardData(): Promise<AdminDashboardData> {
   const admin = await requireAdmin({ redirectTo: "/admin/login" });
-  const content = await fetchPublicSiteContent();
+  const content = await fetchPublicSiteContent({
+    includeDraftTours: true,
+    includeUnpublishedGallery: true,
+  });
   return { ...content, admin };
 }
 
@@ -374,10 +500,13 @@ export type SaveTourInput = {
   legacyKey?: string;
   slug?: string;
   title: string;
+  status?: "draft" | "published";
   categoryId?: number;
   categoryLabel?: string;
   location?: string;
   duration?: string;
+  tourDate?: string;
+  bookingUrl?: string;
   difficulty?: string;
   bestFor?: string;
   bestSeason?: string;
@@ -398,12 +527,30 @@ export type SaveTourInput = {
   notes?: string[];
 };
 
+export type SaveGalleryItemInput = {
+  id?: number;
+  slug?: string;
+  title: string;
+  image?: string;
+  description?: string;
+  sortOrder?: number;
+  isPublished?: boolean;
+};
+
 export type SaveTestimonialInput = {
   id?: number;
   legacyKey?: string;
   name: string;
   role: string;
   text: string;
+};
+
+export type SaveTeamMemberInput = {
+  id?: number;
+  slug?: string;
+  name: string;
+  role?: string;
+  description?: string;
 };
 
 export type SaveShopItemInput = {
@@ -645,14 +792,20 @@ export async function upsertTour(input: SaveTourInput) {
   const finalCategoryLabel = input.categoryId ? dbCategoryLabel : (input.categoryLabel?.trim() ?? "");
   const image = input.image?.trim() ?? "";
   const gallery = input.gallery?.filter((item) => item.src.trim()) ?? [];
+  const normalizedTourDate = toIsoDateString(input.tourDate?.trim()) ?? null;
+  const normalizedBookingUrl = input.bookingUrl?.trim() ?? "";
+  const normalizedStatus = normalizeTourStatus(input.status);
 
   const values = [
     slug,
     title,
+    normalizedStatus,
     input.categoryId ?? null,
     finalCategoryLabel,
     input.location?.trim() ?? "",
     input.duration?.trim() ?? "",
+    normalizedTourDate,
+    normalizedBookingUrl,
     input.difficulty?.trim() ?? "",
     input.bestFor?.trim() ?? "",
     input.bestSeason?.trim() ?? "",
@@ -680,10 +833,13 @@ export async function upsertTour(input: SaveTourInput) {
         SET
           slug = ?,
           title = ?,
+          status = ?,
           category_id = ?,
           category_label = ?,
           location = ?,
           duration = ?,
+          tour_date = ?,
+          booking_url = ?,
           difficulty = ?,
           best_for = ?,
           best_season = ?,
@@ -712,10 +868,13 @@ export async function upsertTour(input: SaveTourInput) {
         INSERT INTO cms_tours (
           slug,
           title,
+          status,
           category_id,
           category_label,
           location,
           duration,
+          tour_date,
+          booking_url,
           difficulty,
           best_for,
           best_season,
@@ -734,7 +893,7 @@ export async function upsertTour(input: SaveTourInput) {
           who_can_join,
           faqs_json,
           notes_json
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       values,
     );
@@ -779,6 +938,79 @@ export async function deleteTestimonialById(id: number) {
   await requireAdmin();
   const pool = await getPool();
   await pool.execute("DELETE FROM cms_testimonials WHERE id = ?", [id]);
+}
+
+export async function upsertTeamMember(input: SaveTeamMemberInput) {
+  await requireAdmin();
+  const pool = await getPool();
+  const name = input.name.trim();
+  const slug = slugify(input.slug?.trim() || name);
+  const role = input.role?.trim() ?? "";
+  const description = input.description?.trim() ?? "";
+
+  if (!name) {
+    throw new Error("Team member name is required.");
+  }
+
+  if (!slug) {
+    throw new Error("Team member slug is required.");
+  }
+
+  if (input.id) {
+    await pool.execute(
+      "UPDATE about_team_members SET slug = ?, name = ?, role = ?, description = ? WHERE id = ?",
+      [slug, name, role, description, input.id],
+    );
+  } else {
+    await pool.execute(
+      "INSERT INTO about_team_members (slug, name, role, description) VALUES (?, ?, ?, ?)",
+      [slug, name, role, description],
+    );
+  }
+}
+
+export async function fetchPublicTourBySlug(slug: string): Promise<ManagedTour | undefined> {
+  const staticTour = findStaticTourBySlug(slug);
+
+  try {
+    const pool = await getPool();
+    const [rows] = await pool.execute<any[]>(
+      `
+        SELECT
+          cms_tours.*,
+          DATE_FORMAT(cms_tours.tour_date, '%Y-%m-%d') AS tour_date_value,
+          categories.name AS category_name
+        FROM cms_tours
+        LEFT JOIN categories ON categories.id = cms_tours.category_id
+        WHERE LOWER(cms_tours.slug) = ?
+        LIMIT 1
+      `,
+      [slug.trim().toLowerCase()],
+    );
+
+    if (rows.length > 0) {
+      const mappedTour = mapTourRow(rows[0]);
+      if (!isPublishedTour(mappedTour)) {
+        return undefined;
+      }
+      return mappedTour;
+    }
+  } catch (error) {
+    console.error(`Unable to load tour "${slug}" from MySQL, falling back to static content.`, error);
+  }
+
+  if (!staticTour) {
+    return undefined;
+  }
+
+  const mappedStaticTour = mapStaticTour(staticTour);
+  return isPublishedTour(mappedStaticTour) ? mappedStaticTour : undefined;
+}
+
+export async function deleteTeamMemberById(id: number) {
+  await requireAdmin();
+  const pool = await getPool();
+  await pool.execute("DELETE FROM about_team_members WHERE id = ?", [id]);
 }
 
 export async function upsertShopItem(input: SaveShopItemInput) {
@@ -834,6 +1066,57 @@ export async function deleteShopItemById(id: number) {
   await requireAdmin();
   const pool = await getPool();
   await pool.execute("DELETE FROM shop_items WHERE id = ?", [id]);
+}
+
+export async function upsertGalleryItem(input: SaveGalleryItemInput) {
+  await requireAdmin();
+  const pool = await getPool();
+  const title = input.title.trim();
+  const slug = slugify(input.slug?.trim() || title);
+
+  if (!title || !slug) {
+    throw new Error("Gallery item title is required.");
+  }
+
+  const values = [
+    slug,
+    title,
+    input.image?.trim() ?? "",
+    input.description?.trim() ?? "",
+    Number.isFinite(Number(input.sortOrder)) ? Number(input.sortOrder) : 100,
+    input.isPublished === false ? 0 : 1,
+  ];
+
+  if (input.id) {
+    await pool.execute(
+      `
+        UPDATE cms_gallery_items
+        SET
+          slug = ?,
+          title = ?,
+          image = ?,
+          description = ?,
+          sort_order = ?,
+          is_published = ?
+        WHERE id = ?
+      `,
+      [...values, input.id],
+    );
+  } else {
+    await pool.execute(
+      `
+        INSERT INTO cms_gallery_items (slug, title, image, description, sort_order, is_published)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `,
+      values,
+    );
+  }
+}
+
+export async function deleteGalleryItemById(id: number) {
+  await requireAdmin();
+  const pool = await getPool();
+  await pool.execute("DELETE FROM cms_gallery_items WHERE id = ?", [id]);
 }
 
 export async function upsertBlogPost(input: SaveBlogPostInput) {

@@ -1,7 +1,10 @@
+import { createWhatsAppUrl } from "@/data/siteContact";
 import { WhatsAppLogo } from "./WhatsAppLogo";
 
 export function WhatsAppFab() {
-  const url = "https://wa.me/910000000000?text=" + encodeURIComponent("Hello Paranjape Tours, I want to enquire about your heritage tours.");
+  const url = createWhatsAppUrl(
+    "Hello Paranjape Tours, I want to enquire about your heritage tours.",
+  );
   return (
     <a
       href={url}

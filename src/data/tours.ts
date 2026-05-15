@@ -27,6 +27,10 @@ import {
 export type Tour = {
   slug: string;
   title: string;
+  cardRibbonLabel?: string;
+  tourDate?: string;
+  bookingUrl?: string;
+  status?: "draft" | "published";
   category: string;
   location: string;
   duration: string;
@@ -300,6 +304,7 @@ export const tours: Tour[] = [
   {
     slug: "hampi-badami-heritage-trip",
     title: "Hampi Badami Heritage Trip",
+    tourDate: "2026-08-10",
     category: "Multiple Day Tour",
     location: "Badami, Pattadakal, Aihole, Ilkal and Hampi",
     duration: "10-16 August 2026",
@@ -403,6 +408,7 @@ export const tours: Tour[] = [
   {
     slug: "ayodhya-varanasi-prayagraj-tour",
     title: "Varanasi-Sarnath-Ayodhya Heritage Tour",
+    tourDate: "2026-07-08",
     category: "Multiple Day Tour",
     location: "Varanasi, Sarnath, Ayodhya and Lucknow",
     duration: "5 Days / 4 Nights",
